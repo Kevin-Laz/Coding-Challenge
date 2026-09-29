@@ -16,6 +16,7 @@ import {
   SERVICE_NAMES,
   STORAGE_KEYS,
 } from '../constants';
+import { parseApiError } from '../utils/error-parser.util';
 
 @Injectable({
   providedIn: 'root',
@@ -88,7 +89,7 @@ export class ApiService {
       this.setToken(res.token);
       return true;
     } catch (err: unknown) {
-      const msg = this.extractErrorMessage(err);
+      const msg = parseApiError(err);
       this.errorMessage.set(`${GLOBAL_MESSAGES.AUTH_FAILED_PREFIX}${msg}`);
       return false;
     }
@@ -164,27 +165,11 @@ export class ApiService {
       );
       this.result.set(response);
     } catch (err: unknown) {
-      const msg = this.extractErrorMessage(err);
+      const msg = parseApiError(err);
       this.errorMessage.set(msg);
       this.result.set(null);
     } finally {
       this.isProcessing.set(false);
     }
-  }
-
-  private extractErrorMessage(err: unknown): string {
-    if (err && typeof err === 'object' && 'error' in err) {
-      const httpError = err as {
-        error?: { error?: string; details?: string };
-        message?: string;
-      };
-      if (httpError.error?.error) {
-        return httpError.error.details
-          ? `${httpError.error.error} (${httpError.error.details})`
-          : httpError.error.error;
-      }
-      if (httpError.message) return httpError.message;
-    }
-    return GLOBAL_MESSAGES.NETWORK_OR_SERVER_ERROR;
   }
 }
