@@ -4,9 +4,10 @@ import {
   input,
   output,
   signal,
+  effect,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import {
@@ -23,6 +24,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthModalComponent {
+  private readonly document = inject(DOCUMENT);
   readonly api = inject(ApiService);
   readonly text = AUTH_MODAL_TEXT;
 
@@ -32,6 +34,21 @@ export class AuthModalComponent {
   readonly username = signal<string>(AUTH_MODAL_DEFAULTS.USERNAME);
   readonly password = signal<string>(AUTH_MODAL_DEFAULTS.PASSWORD);
   readonly isLoading = signal<boolean>(false);
+
+  constructor() {
+    effect((onCleanup) => {
+      const isVisible = this.visible();
+      if (isVisible) {
+        this.document.body.style.overflow = 'hidden';
+      } else {
+        this.document.body.style.overflow = '';
+      }
+
+      onCleanup(() => {
+        this.document.body.style.overflow = '';
+      });
+    });
+  }
 
   onClose(): void {
     this.close.emit();
