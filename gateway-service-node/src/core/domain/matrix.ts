@@ -86,4 +86,34 @@ export function assertValidMatrix(matrix: unknown): asserts matrix is Matrix2D {
       DOMAIN_CONSTANTS.ERRORS.QR_RESTRICTION_TALL_OR_SQUARE(rows, cols)
     );
   }
+
+  /*
+   * ============================================================================
+   * LIMITACIONES DEL PROTOCOLO DE TRANSPORTE (HTTP/HTTPS + JSON REST):
+   * ============================================================================
+   * 1. Límite de Serialización JSON: Cada celda numérica float64 ocupa ~15-20 bytes en texto plano.
+   *    Una matriz >1000x1000 (~1.000.000 de celdas) produce payloads entrantes/salientes de 40MB a 60MB.
+   * 2. Bloqueo de Event Loop (Single-Thread Node.js): JSON.stringify() y JSON.parse() son operaciones
+   *    síncronas en el motor V8. Matrices de gran escala congelan el hilo durante segundos.
+   * 3. Overhead de Criptografía TLS en HTTPS: Transferir payloads de decenas de megabytes sobre HTTPS
+   *    añade un coste computacional de cifrado/descifrado simétrico por chunks (AES-GCM / ChaCha20).
+   * 4. Timeouts de Conexión: La latencia de transporte HTTP + tiempo de factorización excede
+   *    los timeouts estándar (30s) ante matrices masivas.
+   * Recomendación Arquitectural para escala superior: gRPC con buffers binarios Protobuf o Streaming.
+   * ============================================================================
+   */
+  if (
+    rows > DOMAIN_CONSTANTS.LIMITS.MAX_ROWS ||
+    cols > DOMAIN_CONSTANTS.LIMITS.MAX_COLS ||
+    rows * cols > DOMAIN_CONSTANTS.LIMITS.MAX_ELEMENTS
+  ) {
+    throw new Error(
+      DOMAIN_CONSTANTS.ERRORS.EXCEEDS_MAX_DIMENSIONS(
+        rows,
+        cols,
+        DOMAIN_CONSTANTS.LIMITS.MAX_ROWS,
+        DOMAIN_CONSTANTS.LIMITS.MAX_COLS
+      )
+    );
+  }
 }
