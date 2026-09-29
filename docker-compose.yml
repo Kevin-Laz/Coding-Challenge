@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # Microservicio 1: Motor de Descomposición QR en Go (Fiber)
+  qr-service-go:
+    build:
+      context: ./qr-service-go
+      dockerfile: Dockerfile
+    container_name: qr-service-go
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+    networks:
+      - qr-network
+    restart: unless-stopped
+
+  # Microservicio 2: API Gateway / Orquestador en Express (TypeScript)
+  gateway-service-node:
+    build:
+      context: ./gateway-service-node
+      dockerfile: Dockerfile
+    container_name: gateway-service-node
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - QR_SERVICE_URL=http://qr-service-go:8080/qr/decompose
+    depends_on:
+      - qr-service-go
+    networks:
+      - qr-network
+    restart: unless-stopped
+
+networks:
+  qr-network:
+    driver: bridge
