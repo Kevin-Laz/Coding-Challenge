@@ -3,6 +3,7 @@ export const HTTP_CONSTANTS = {
     ROOT: "/",
     HEALTH: "/health",
     PROCESS: "/process",
+    AUTH_LOGIN: "/auth/login",
   },
   HEALTH: {
     STATUS_HEALTHY: "healthy",

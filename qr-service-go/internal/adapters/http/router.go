@@ -27,7 +27,7 @@ func SetupRoutes(app *fiber.App, handler *QRHandler) {
 	app.Use(recover.New())
 	app.Use(logger.New())
 
-	// Endpoint de comprobación de salud del contenedor/microservicio
+	// Endpoint público: Comprobación de salud del contenedor/microservicio (para pings y monitoreo)
 	app.Get(constants.RouteHealth, func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"status":  constants.HealthStatusHealthy,
@@ -36,6 +36,7 @@ func SetupRoutes(app *fiber.App, handler *QRHandler) {
 	})
 
 	// Agrupamiento y definición de rutas del dominio QR
+	// Ruta privada protegida con InternalAuthMiddleware (solo el Gateway con el header interno puede consumirla)
 	qrGroup := app.Group(constants.RouteGroupQR)
-	qrGroup.Post(constants.RouteQRDecompose, handler.HandleDecompose)
+	qrGroup.Post(constants.RouteQRDecompose, InternalAuthMiddleware(), handler.HandleDecompose)
 }

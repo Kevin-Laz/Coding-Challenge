@@ -17,18 +17,23 @@
 import { Matrix2D, QRDecompositionResponse } from "../../core/domain/matrix";
 import { IQRClientPort } from "../../core/ports/qr_client.port";
 import { CLIENT_CONSTANTS } from "../../constants/client.constants";
+import { AUTH_CONSTANTS } from "../../constants/auth.constants";
 
 export class QRHttpClientAdapter implements IQRClientPort {
   private readonly baseUrl: string;
   private readonly timeoutMs: number;
+  private readonly internalApiKey: string;
 
   constructor(
     baseUrl: string = process.env.QR_SERVICE_URL ||
       CLIENT_CONSTANTS.QR_SERVICE.DEFAULT_BASE_URL,
-    timeoutMs: number = CLIENT_CONSTANTS.QR_SERVICE.DEFAULT_TIMEOUT_MS
+    timeoutMs: number = CLIENT_CONSTANTS.QR_SERVICE.DEFAULT_TIMEOUT_MS,
+    internalApiKey: string = process.env.INTERNAL_API_KEY ||
+      AUTH_CONSTANTS.INTERNAL_API_KEY.DEFAULT_KEY
   ) {
     this.baseUrl = baseUrl;
     this.timeoutMs = timeoutMs;
+    this.internalApiKey = internalApiKey;
   }
 
   public async decomposeMatrix(matrix: Matrix2D): Promise<QRDecompositionResponse> {
@@ -41,6 +46,7 @@ export class QRHttpClientAdapter implements IQRClientPort {
         headers: {
           "Content-Type": CLIENT_CONSTANTS.QR_SERVICE.CONTENT_TYPE_JSON,
           "Accept": CLIENT_CONSTANTS.QR_SERVICE.CONTENT_TYPE_JSON,
+          [AUTH_CONSTANTS.INTERNAL_API_KEY.HEADER_NAME]: this.internalApiKey,
         },
         body: JSON.stringify({ matrix }),
         signal: controller.signal,

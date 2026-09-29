@@ -112,17 +112,37 @@ docker-compose up --build
 ```
 
 Endpoints expuestos:
-- **API Gateway (Express)**: `http://localhost:3000/process`
-- **Engine QR (Go)**: `http://localhost:8080/qr/decompose`
+- **API Gateway (Express)**: `http://localhost:3000/process` (Ruta privada con JWT)
+- **Engine QR (Go)**: `http://localhost:8080/qr/decompose` (Ruta privada interna con `x-internal-api-key`)
 
 ---
 
-## 5. Ejemplo de Petición cURL
+## 5. Autenticación y Ejemplo de Petición cURL
 
-### Petición al Gateway (Express Node.js):
+### Paso 1: Autenticarse para obtener el Token JWT (API Gateway)
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "secretpassword123"
+  }'
+```
+*Respuesta:*
+```json
+{
+  "message": "Autenticación satisfactoria.",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer",
+  "expiresIn": "1h"
+}
+```
+
+### Paso 2: Petición Protegida al Gateway con JWT:
 ```bash
 curl -X POST http://localhost:3000/process \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <TU_TOKEN_JWT>" \
   -d '{
     "matrix": [
       [12, -51, 4],
