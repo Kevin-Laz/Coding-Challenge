@@ -51,41 +51,118 @@
   }
 }
 
-/* Loading state */
-.loading-state {
-  flex: 1;
+/* Skeleton Loader State */
+.skeleton-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 1.75rem;
+  animation: fade-in 0.2s ease;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 0%,
+    var(--surface-3) 50%,
+    var(--surface-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite ease-in-out;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-title-bar {
+  height: 20px;
+  width: 280px;
+}
+
+.skeleton-subtitle-bar {
+  height: 14px;
+  width: 420px;
+  opacity: 0.6;
+}
+
+.skeleton-card {
+  gap: 0.6rem;
   justify-content: center;
-  gap: 1.25rem;
-  padding: 3rem 1rem;
 }
 
-.loading-spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--border);
-  border-top-color: var(--color-accent);
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
+.skeleton-line-sm {
+  height: 10px;
+  width: 60%;
 }
 
-.loading-title {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-primary);
+.skeleton-line-lg {
+  height: 22px;
+  width: 85%;
 }
 
-.loading-desc {
-  font-size: 0.76rem;
-  color: var(--text-muted);
-  text-align: center;
-  max-width: 320px;
+.skeleton-section-title {
+  height: 14px;
+  width: 200px;
+  margin-bottom: 0.25rem;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.skeleton-table-box {
+  background: var(--surface-1);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-table-header {
+  height: 28px;
+  width: 100%;
+}
+
+.skeleton-table-row {
+  height: 22px;
+  width: 100%;
+  opacity: 0.7;
+}
+
+.skeleton-matrix-box {
+  background: var(--surface-1);
+}
+
+.skeleton-box-head {
+  height: 38px;
+  width: 100%;
+}
+
+.skeleton-matrix-body {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-matrix-row {
+  display: flex;
+  gap: 6px;
+}
+
+.skeleton-cell {
+  height: 26px;
+  flex: 1;
+  min-width: 60px;
 }
 
 /* Results */

@@ -55,12 +55,12 @@
             type="number"
             class="form-input dim-input"
             [ngModel]="gridRows()"
-            (ngModelChange)="gridRows.set($event)"
+            (ngModelChange)="setGridRows($event)"
             min="1"
-            max="20"
+            max="30"
           />
         </div>
-        <span class="dim-separator">x</span>
+        <span class="dim-separator">×</span>
         <div class="dim-group">
           <label class="form-label" for="gridCols">Columnas</label>
           <input
@@ -68,16 +68,16 @@
             type="number"
             class="form-input dim-input"
             [ngModel]="gridCols()"
-            (ngModelChange)="gridCols.set($event)"
+            (ngModelChange)="setGridCols($event)"
             min="1"
-            max="20"
+            max="30"
           />
         </div>
-        <button class="btn btn-outline btn-sm" (click)="applyGridDimensions()">
-          Generar cuadricula
-        </button>
-        <button class="btn btn-ghost btn-sm" (click)="fillRandomGrid()">
+        <button type="button" class="btn btn-outline btn-sm btn-fixed" (click)="fillRandomGrid()">
           Rellenar aleatorio
+        </button>
+        <button type="button" class="btn btn-ghost btn-sm btn-fixed" (click)="clearGrid()">
+          Borrar datos
         </button>
       </div>
 
@@ -85,22 +85,32 @@
         <div
           class="matrix-grid-interactive"
           [style.--cols]="gridCols()"
+          role="grid"
+          [attr.aria-label]="'Matriz de ' + gridRows() + ' por ' + gridCols()"
         >
           @for (r of gridRowsArray(); track r) {
-            @for (c of gridColsArray(); track c) {
-              <input
-                type="number"
-                class="cell-input"
-                [value]="getCellValue(r, c)"
-                (input)="updateCell(r, c, $any($event.target).value)"
-                placeholder="0"
-                [attr.aria-label]="'Celda fila ' + (r+1) + ' columna ' + (c+1)"
-              />
-            }
+            <div class="matrix-row-group" role="row">
+              @for (c of gridColsArray(); track c) {
+                <input
+                  #cellInput
+                  type="text"
+                  inputmode="numeric"
+                  class="cell-input"
+                  [class.cell-invalid]="isCellInvalid(r, c)"
+                  [value]="getCellValue(r, c)"
+                  (input)="updateCell(r, c, $any($event.target).value)"
+                  (keydown)="onCellKeydown($event, r, c)"
+                  placeholder="0"
+                  role="gridcell"
+                  [attr.aria-label]="'Celda fila ' + (r+1) + ', columna ' + (c+1)"
+                  [attr.aria-invalid]="isCellInvalid(r, c)"
+                />
+              }
+            </div>
           }
         </div>
         @if (gridRows() === 0 || gridCols() === 0) {
-          <p class="grid-empty-hint">Configure las dimensiones y haga clic en Generar cuadricula.</p>
+          <p class="grid-empty-hint">Configure las dimensiones y haga clic en Generar cuadrícula.</p>
         }
       </div>
     </div>
@@ -146,8 +156,18 @@
 
   <!-- Boton submit -->
   <div class="submit-row">
-    <button class="btn btn-primary btn-block" (click)="onSubmit()">
-      Ejecutar descomposicion QR
+    <button
+      type="button"
+      class="btn btn-primary btn-block btn-submit"
+      (click)="onSubmit()"
+      [disabled]="isProcessing()"
+    >
+      @if (isProcessing()) {
+        <span class="btn-spinner"></span>
+        <span>Procesando matriz...</span>
+      } @else {
+        <span>Ejecutar descomposición QR</span>
+      }
     </button>
   </div>
 </div>

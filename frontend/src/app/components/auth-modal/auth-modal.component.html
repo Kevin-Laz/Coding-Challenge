@@ -2,7 +2,7 @@
   <div class="modal-backdrop" (click)="onClose()">
     <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
       <div class="modal-header">
-        <h3 class="modal-title" id="auth-modal-title">Autenticacion JWT</h3>
+        <h3 class="modal-title" id="auth-modal-title">Autenticacion</h3>
         <button class="close-btn" (click)="onClose()" aria-label="Cerrar modal">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"/>
@@ -13,7 +13,7 @@
 
       <div class="modal-body">
         <p class="modal-desc">
-          Ingrese sus credenciales para obtener un token JWT y autenticar las solicitudes al motor QR.
+          Ingrese sus credenciales para obtener acceso a las solicitudes al motor QR.
         </p>
 
         <div class="form-group">
@@ -42,14 +42,23 @@
           />
         </div>
 
-        @if (api.errorMessage()) {
-          <div class="error-msg">{{ api.errorMessage() }}</div>
-        }
+        <div
+          class="auth-status-box"
+          [class.has-error]="api.errorMessage()"
+          role="status"
+          aria-live="polite"
+        >
+          @if (api.errorMessage()) {
+            <span class="auth-status-error">{{ api.errorMessage() }}</span>
+          } @else {
+            <span class="auth-status-info">Ingrese sus datos para autenticar y desbloquear el cálculo.</span>
+          }
+        </div>
 
         <div class="modal-actions">
-          <button class="btn btn-outline" (click)="onClose()">Cancelar</button>
+          <button class="btn btn-outline btn-fixed-sm" (click)="onClose()">Cancelar</button>
           <button
-            class="btn btn-primary"
+            class="btn btn-primary btn-fixed"
             (click)="onLogin()"
             [disabled]="isLoading()"
           >

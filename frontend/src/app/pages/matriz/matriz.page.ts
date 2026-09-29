@@ -8,11 +8,12 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { Matrix2D } from '../../models/matrix.models';
 import { MatrixInputComponent } from '../../components/matrix-input/matrix-input.component';
+import { InfoStatusPanelComponent } from '../../components/info-status-panel/info-status-panel.component';
 
 @Component({
   selector: 'app-matriz-page',
   standalone: true,
-  imports: [CommonModule, MatrixInputComponent],
+  imports: [CommonModule, MatrixInputComponent, InfoStatusPanelComponent],
   template: `
     <div class="page-container">
       <div class="page-header">
@@ -22,8 +23,12 @@ import { MatrixInputComponent } from '../../components/matrix-input/matrix-input
         </p>
       </div>
 
+      <!-- Recuadro estático persistente para mensajes informativos y validaciones -->
+      <app-info-status-panel [errorMessage]="api.errorMessage()" />
+
       <div class="matrix-card">
         <app-matrix-input
+          [isProcessing]="api.isProcessing()"
           (submitMatrix)="onMatrixSubmit($event)"
           (errorChange)="onError($event)"
         />
@@ -37,7 +42,7 @@ import { MatrixInputComponent } from '../../components/matrix-input/matrix-input
       padding: 1.5rem 1rem 3rem;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
 
     .page-header {
@@ -52,15 +57,15 @@ import { MatrixInputComponent } from '../../components/matrix-input/matrix-input
     }
 
     .page-desc {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: var(--text-secondary);
       max-width: 600px;
       margin: 0 auto;
     }
 
     .matrix-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
+      background: var(--surface-1);
+      border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       padding: 1.5rem;
       box-shadow: var(--shadow-sm);
@@ -69,7 +74,7 @@ import { MatrixInputComponent } from '../../components/matrix-input/matrix-input
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatrizPage {
-  private readonly api = inject(ApiService);
+  readonly api = inject(ApiService);
   private readonly router = inject(Router);
 
   async onMatrixSubmit(matrix: Matrix2D): Promise<void> {
@@ -80,10 +85,9 @@ export class MatrizPage {
       return;
     }
 
+    // Redirigir de inmediato a /resultados para ver la pantalla de carga
+    this.router.navigate(['/resultados']);
     await this.api.processMatrix(matrix);
-    if (this.api.result()) {
-      this.router.navigate(['/resultados']);
-    }
   }
 
   onError(msg: string | null): void {

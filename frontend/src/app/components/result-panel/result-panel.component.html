@@ -7,25 +7,70 @@
   <!-- Estado vacio -->
   @if (!api.result() && !api.isProcessing()) {
     <div class="empty-state">
-      <div class="empty-icon">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
-      </div>
       <p class="empty-title">Sin resultados</p>
-      <p class="empty-desc">Configure una matriz en el panel izquierdo y ejecute la descomposicion QR.</p>
+      <p class="empty-desc">Configure una matriz en la vista de entrada y ejecute la descomposición QR.</p>
     </div>
   }
 
-  <!-- Estado de carga -->
+  <!-- Skeleton loader mientras calcula -->
   @if (api.isProcessing()) {
-    <div class="loading-state">
-      <div class="loading-spinner"></div>
-      <p class="loading-title">Calculando descomposicion QR</p>
-      <p class="loading-desc">El motor Go esta procesando la descomposicion de Gram-Schmidt...</p>
+    <div class="skeleton-container" aria-busy="true" aria-label="Calculando descomposición QR">
+      <div class="skeleton-header">
+        <div class="skeleton-shimmer skeleton-title-bar"></div>
+        <div class="skeleton-shimmer skeleton-subtitle-bar"></div>
+      </div>
+
+      <!-- Skeleton Métricas -->
+      <div class="metrics-grid">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="metric-card skeleton-card">
+            <div class="skeleton-shimmer skeleton-line-sm"></div>
+            <div class="skeleton-shimmer skeleton-line-lg"></div>
+          </div>
+        }
+      </div>
+
+      <!-- Skeleton Tabla -->
+      <div class="section-block">
+        <div class="skeleton-shimmer skeleton-section-title"></div>
+        <div class="table-wrapper skeleton-table-box">
+          <div class="skeleton-shimmer skeleton-table-header"></div>
+          @for (row of [1,2,3,4,5]; track row) {
+            <div class="skeleton-shimmer skeleton-table-row"></div>
+          }
+        </div>
+      </div>
+
+      <!-- Skeleton Matrices -->
+      <div class="section-block">
+        <div class="skeleton-shimmer skeleton-section-title"></div>
+        <div class="matrices-grid">
+          <div class="matrix-box skeleton-matrix-box">
+            <div class="skeleton-shimmer skeleton-box-head"></div>
+            <div class="skeleton-matrix-body">
+              @for (r of [1,2,3]; track r) {
+                <div class="skeleton-matrix-row">
+                  @for (c of [1,2,3]; track c) {
+                    <div class="skeleton-shimmer skeleton-cell"></div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+          <div class="matrix-box skeleton-matrix-box">
+            <div class="skeleton-shimmer skeleton-box-head"></div>
+            <div class="skeleton-matrix-body">
+              @for (r of [1,2,3]; track r) {
+                <div class="skeleton-matrix-row">
+                  @for (c of [1,2,3]; track c) {
+                    <div class="skeleton-shimmer skeleton-cell"></div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   }
 

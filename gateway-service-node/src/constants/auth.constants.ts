@@ -10,7 +10,7 @@ export const AUTH_CONSTANTS = {
   },
   MESSAGES: {
     MISSING_TOKEN: "Acceso denegado: Cabecera 'Authorization: Bearer <token>' requerida.",
-    INVALID_TOKEN: "Token JWT inválido o expirado.",
+    INVALID_TOKEN: "Token inválido o expirado.",
     LOGIN_SUCCESS: "Autenticación satisfactoria.",
     INVALID_CREDENTIALS: "Credenciales de acceso inválidas.",
     MISSING_CREDENTIALS: "Se requieren los campos 'username' y 'password'.",

@@ -16,11 +16,11 @@ import { ResultPanelComponent } from '../../components/result-panel/result-panel
   template: `
     <div class="page-container">
       <div class="page-nav">
-        <button class="btn btn-secondary back-btn" (click)="goBack()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="btn btn-outline back-btn" (click)="goBack()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          Nueva Matriz / Volver a entrada
+          Volver
         </button>
 
         @if (api.result()) {
@@ -57,8 +57,11 @@ import { ResultPanelComponent } from '../../components/result-panel/result-panel
     .back-btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
+      gap: 0.45rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      min-width: 110px;
+      justify-content: center;
       padding: 0.5rem 1rem;
     }
 
@@ -74,8 +77,8 @@ import { ResultPanelComponent } from '../../components/result-panel/result-panel
     }
 
     .results-wrapper {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
+      background: var(--surface-1);
+      border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       padding: 1.5rem;
       box-shadow: var(--shadow-sm);
