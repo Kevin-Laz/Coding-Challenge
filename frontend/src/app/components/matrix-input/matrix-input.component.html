@@ -1,0 +1,153 @@
+<div class="input-panel">
+  <div class="panel-header">
+    <h2 class="panel-title">Configuracion de Matriz</h2>
+    <p class="panel-desc">Ingrese los datos de la matriz para ejecutar la descomposicion QR</p>
+  </div>
+
+  <!-- Plantillas rapidas -->
+  <div class="quick-templates">
+    <span class="section-label">Plantillas rapidas</span>
+    <div class="template-grid">
+      @for (tpl of quickTemplates; track tpl.label) {
+        <button class="btn btn-ghost btn-xs" (click)="applyTemplate(tpl.rows, tpl.cols)">
+          {{ tpl.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar" role="tablist">
+    <button
+      class="tab"
+      role="tab"
+      [class.active]="activeTab() === 'grid'"
+      (click)="setTab('grid')"
+    >
+      Cuadricula interactiva
+    </button>
+    <button
+      class="tab"
+      role="tab"
+      [class.active]="activeTab() === 'text'"
+      (click)="setTab('text')"
+    >
+      Texto libre
+    </button>
+    <button
+      class="tab"
+      role="tab"
+      [class.active]="activeTab() === 'json'"
+      (click)="setTab('json')"
+    >
+      JSON directo
+    </button>
+  </div>
+
+  <!-- Tab: Cuadricula -->
+  @if (activeTab() === 'grid') {
+    <div class="tab-content">
+      <div class="dimension-controls">
+        <div class="dim-group">
+          <label class="form-label" for="gridRows">Filas</label>
+          <input
+            id="gridRows"
+            type="number"
+            class="form-input dim-input"
+            [ngModel]="gridRows()"
+            (ngModelChange)="gridRows.set($event)"
+            min="1"
+            max="20"
+          />
+        </div>
+        <span class="dim-separator">x</span>
+        <div class="dim-group">
+          <label class="form-label" for="gridCols">Columnas</label>
+          <input
+            id="gridCols"
+            type="number"
+            class="form-input dim-input"
+            [ngModel]="gridCols()"
+            (ngModelChange)="gridCols.set($event)"
+            min="1"
+            max="20"
+          />
+        </div>
+        <button class="btn btn-outline btn-sm" (click)="applyGridDimensions()">
+          Generar cuadricula
+        </button>
+        <button class="btn btn-ghost btn-sm" (click)="fillRandomGrid()">
+          Rellenar aleatorio
+        </button>
+      </div>
+
+      <div class="matrix-grid-wrapper">
+        <div
+          class="matrix-grid-interactive"
+          [style.--cols]="gridCols()"
+        >
+          @for (r of gridRowsArray(); track r) {
+            @for (c of gridColsArray(); track c) {
+              <input
+                type="number"
+                class="cell-input"
+                [value]="getCellValue(r, c)"
+                (input)="updateCell(r, c, $any($event.target).value)"
+                placeholder="0"
+                [attr.aria-label]="'Celda fila ' + (r+1) + ' columna ' + (c+1)"
+              />
+            }
+          }
+        </div>
+        @if (gridRows() === 0 || gridCols() === 0) {
+          <p class="grid-empty-hint">Configure las dimensiones y haga clic en Generar cuadricula.</p>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Tab: Texto libre -->
+  @if (activeTab() === 'text') {
+    <div class="tab-content">
+      <label for="matrixText" class="form-label">
+        Filas separadas por salto de linea, valores por coma o espacio
+      </label>
+      <textarea
+        id="matrixText"
+        class="matrix-textarea"
+        rows="10"
+        [ngModel]="textInput()"
+        (ngModelChange)="textInput.set($event)"
+        placeholder="12, -51, 4&#10;6, 167, -68&#10;-4, 24, -41"
+      ></textarea>
+    </div>
+  }
+
+  <!-- Tab: JSON -->
+  @if (activeTab() === 'json') {
+    <div class="tab-content">
+      <label for="matrixJson" class="form-label">
+        Array de arrays de numeros en formato JSON
+      </label>
+      <textarea
+        id="matrixJson"
+        class="matrix-textarea json-textarea"
+        rows="10"
+        [ngModel]="jsonInput()"
+        (ngModelChange)="jsonInput.set($event)"
+        placeholder="[[12, -51, 4], [6, 167, -68], [-4, 24, -41]]"
+        spellcheck="false"
+      ></textarea>
+      @if (jsonError()) {
+        <div class="field-error">{{ jsonError() }}</div>
+      }
+    </div>
+  }
+
+  <!-- Boton submit -->
+  <div class="submit-row">
+    <button class="btn btn-primary btn-block" (click)="onSubmit()">
+      Ejecutar descomposicion QR
+    </button>
+  </div>
+</div>

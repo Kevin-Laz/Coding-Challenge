@@ -1,0 +1,158 @@
+<div class="result-panel">
+  <div class="panel-header">
+    <h2 class="panel-title">Resultados de la Descomposicion</h2>
+    <p class="panel-desc">Metricas estadisticas y matrices Q y R resultantes</p>
+  </div>
+
+  <!-- Estado vacio -->
+  @if (!api.result() && !api.isProcessing()) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <p class="empty-title">Sin resultados</p>
+      <p class="empty-desc">Configure una matriz en el panel izquierdo y ejecute la descomposicion QR.</p>
+    </div>
+  }
+
+  <!-- Estado de carga -->
+  @if (api.isProcessing()) {
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p class="loading-title">Calculando descomposicion QR</p>
+      <p class="loading-desc">El motor Go esta procesando la descomposicion de Gram-Schmidt...</p>
+    </div>
+  }
+
+  <!-- Resultados -->
+  @if (api.result(); as result) {
+    <div class="results-container">
+
+      <!-- Tarjetas de metricas -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">Dimensiones</span>
+          <span class="metric-value">{{ result.dimensions.rows }} x {{ result.dimensions.cols }}</span>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-label">Tiempo motor Go</span>
+          <span class="metric-value">{{ result.timing.goExecutionMs.toFixed(3) }} ms</span>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-label">Orquestacion total</span>
+          <span class="metric-value">{{ result.timing.totalOrchestrationMs }} ms</span>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-label">Error de reconstruccion (||A-QR||)</span>
+          <span class="metric-value accent">{{ result.qrResult.reconstructionErrorFrobenius.toExponential(4) }}</span>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-label">Numero de condicion est. (R max/min)</span>
+          <span class="metric-value">{{ conditionNumber() }}</span>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-label">Norma de Frobenius original</span>
+          <span class="metric-value">{{ result.originalStats.frobeniusNorm.toFixed(4) }}</span>
+        </div>
+      </div>
+
+      <!-- Tabla comparativa -->
+      <div class="section-block">
+        <h3 class="section-title">Tabla comparativa de estadisticas</h3>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Metrica</th>
+                <th>Matriz original (A)</th>
+                <th>Matriz ortogonal (Q)</th>
+                <th>Triangular superior (R)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Media aritmetica</td>
+                <td>{{ result.originalStats.mean.toFixed(4) }}</td>
+                <td>{{ result.qrResult.qStats.mean.toFixed(4) }}</td>
+                <td>{{ result.qrResult.rStats.mean.toFixed(4) }}</td>
+              </tr>
+              <tr>
+                <td>Norma de Frobenius</td>
+                <td>{{ result.originalStats.frobeniusNorm.toFixed(4) }}</td>
+                <td>{{ result.qrResult.qStats.frobeniusNorm.toFixed(4) }}</td>
+                <td>{{ result.qrResult.rStats.frobeniusNorm.toFixed(4) }}</td>
+              </tr>
+              <tr>
+                <td>Elemento minimo</td>
+                <td>{{ result.originalStats.min.toFixed(4) }}</td>
+                <td>{{ result.qrResult.qStats.min.toFixed(4) }}</td>
+                <td>{{ result.qrResult.rStats.min.toFixed(4) }}</td>
+              </tr>
+              <tr>
+                <td>Elemento maximo</td>
+                <td>{{ result.originalStats.max.toFixed(4) }}</td>
+                <td>{{ result.qrResult.qStats.max.toFixed(4) }}</td>
+                <td>{{ result.qrResult.rStats.max.toFixed(4) }}</td>
+              </tr>
+              <tr>
+                <td>Suma de elementos</td>
+                <td>{{ result.originalStats.sum.toFixed(4) }}</td>
+                <td>{{ result.qrResult.qStats.sum.toFixed(4) }}</td>
+                <td>{{ result.qrResult.rStats.sum.toFixed(4) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Matrices Q y R -->
+      <div class="section-block">
+        <h3 class="section-title">Matrices resultantes</h3>
+        <div class="matrices-grid">
+          <div class="matrix-box">
+            <div class="matrix-box-header">
+              <span class="matrix-box-title">Matriz ortonormal Q (m x n)</span>
+              <span class="matrix-box-hint">Columnas ortogonales, norma unitaria</span>
+            </div>
+            <div class="matrix-scroll">
+              @for (row of result.qrResult.q; track $index) {
+                <div class="matrix-row">
+                  @for (val of row; track $index) {
+                    <span class="matrix-cell">{{ val.toFixed(4) }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="matrix-box">
+            <div class="matrix-box-header">
+              <span class="matrix-box-title">Matriz triangular R (n x n)</span>
+              <span class="matrix-box-hint">Triangular superior con diagonal positiva</span>
+            </div>
+            <div class="matrix-scroll">
+              @for (row of result.qrResult.r; track $index) {
+                <div class="matrix-row">
+                  @for (val of row; track $index) {
+                    <span class="matrix-cell">{{ val.toFixed(4) }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+</div>

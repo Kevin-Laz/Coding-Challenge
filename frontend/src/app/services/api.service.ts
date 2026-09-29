@@ -39,6 +39,11 @@ export class ApiService {
   readonly isProcessing = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
   readonly result = signal<ProcessedMatrixResponse | null>(null);
+  readonly authModalRequested = signal<boolean>(false);
+
+  requestAuthModal(): void {
+    this.authModalRequested.set(true);
+  }
 
   constructor() {
     // Comprobar salud inmediatamente al cargar

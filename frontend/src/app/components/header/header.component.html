@@ -1,0 +1,56 @@
+<header class="header">
+  <div class="brand">
+    <span class="brand-title">Motor QR</span>
+    <span class="brand-subtitle">Sistema de Descomposición Matricial</span>
+  </div>
+
+  <div class="header-actions">
+    <div class="health-monitor">
+      <div
+        class="health-badge"
+        [class.healthy]="api.gatewayHealth().status === 'healthy'"
+        [class.unhealthy]="api.gatewayHealth().status === 'unhealthy'"
+        [class.checking]="api.gatewayHealth().status === 'checking'"
+      >
+        <span class="dot"></span>
+        <div class="badge-info">
+          <span class="label">Gateway Node</span>
+          @if (api.gatewayHealth().latencyMs) {
+            <span class="latency">{{ api.gatewayHealth().latencyMs }}ms</span>
+          }
+        </div>
+      </div>
+
+      <div
+        class="health-badge"
+        [class.healthy]="api.goHealth().status === 'healthy'"
+        [class.unhealthy]="api.goHealth().status === 'unhealthy'"
+        [class.checking]="api.goHealth().status === 'checking'"
+      >
+        <span class="dot"></span>
+        <div class="badge-info">
+          <span class="label">Motor Go</span>
+          @if (api.goHealth().latencyMs) {
+            <span class="latency">{{ api.goHealth().latencyMs }}ms</span>
+          }
+        </div>
+      </div>
+
+      <button class="btn btn-ghost btn-sm" (click)="onCheckHealth()" title="Verificar estado de microservicios">
+        Verificar estado
+      </button>
+    </div>
+
+    <div class="auth-section">
+      @if (api.token()) {
+        <div class="auth-active">
+          <span class="auth-indicator"></span>
+          <span class="auth-label">Autenticado</span>
+        </div>
+        <button class="btn btn-outline btn-sm" (click)="onLogout()">Cerrar sesion</button>
+      } @else {
+        <button class="btn btn-primary btn-sm" (click)="onOpenAuth()">Iniciar sesion (JWT)</button>
+      }
+    </div>
+  </div>
+</header>

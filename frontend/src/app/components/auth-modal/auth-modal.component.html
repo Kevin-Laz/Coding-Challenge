@@ -1,0 +1,67 @@
+@if (visible()) {
+  <div class="modal-backdrop" (click)="onClose()">
+    <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <div class="modal-header">
+        <h3 class="modal-title" id="auth-modal-title">Autenticacion JWT</h3>
+        <button class="close-btn" (click)="onClose()" aria-label="Cerrar modal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-desc">
+          Ingrese sus credenciales para obtener un token JWT y autenticar las solicitudes al motor QR.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="loginUser">Usuario</label>
+          <input
+            id="loginUser"
+            type="text"
+            class="form-input"
+            [ngModel]="username()"
+            (ngModelChange)="username.set($event)"
+            placeholder="admin"
+            autocomplete="username"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginPass">Contrasena</label>
+          <input
+            id="loginPass"
+            type="password"
+            class="form-input"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
+        </div>
+
+        @if (api.errorMessage()) {
+          <div class="error-msg">{{ api.errorMessage() }}</div>
+        }
+
+        <div class="modal-actions">
+          <button class="btn btn-outline" (click)="onClose()">Cancelar</button>
+          <button
+            class="btn btn-primary"
+            (click)="onLogin()"
+            [disabled]="isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="btn-spinner"></span>
+              Autenticando...
+            } @else {
+              Autenticar
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
