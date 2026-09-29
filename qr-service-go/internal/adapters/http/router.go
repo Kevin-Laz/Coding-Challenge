@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 
@@ -14,16 +15,22 @@ import (
  * ============================================================================
  * 
  * Middlewares incluidos:
- * 1. recover.New(): Protege el proceso contra pánicos imprevistos en runtime. Si ocurriera
+ * 1. cors.New(): Habilita solicitudes Cross-Origin (CORS) desde clientes web/SPA.
+ * 2. recover.New(): Protege el proceso contra pánicos imprevistos en runtime. Si ocurriera
  *    un desbordamiento de índice en cálculos matriciales, el servidor captura el error y
  *    devuelve un HTTP 500 sin caerse.
- * 2. logger.New(): Registra el throughput, latencia y status HTTP de cada request.
+ * 3. logger.New(): Registra el throughput, latencia y status HTTP de cada request.
  * ============================================================================
  */
 
 // SetupRoutes declara la jerarquía de rutas y conecta los middlewares del servidor Fiber.
 func SetupRoutes(app *fiber.App, handler *QRHandler) {
 	// Middlewares globales
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept, Authorization, x-internal-api-key",
+		AllowMethods: "GET, POST, OPTIONS",
+	}))
 	app.Use(recover.New())
 	app.Use(logger.New())
 

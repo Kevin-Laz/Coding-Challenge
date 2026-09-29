@@ -1,0 +1,257 @@
+<div class="layout-container">
+  <!-- Top Navigation / Header -->
+  <header class="header">
+    <div class="brand">
+      <span class="brand-title">QR MATRIX ENGINE</span>
+      <span class="brand-subtitle">NUMERICAL ORCHESTRATION SYSTEM</span>
+    </div>
+
+    <div class="header-actions">
+      <!-- Health Monitor Badges -->
+      <div class="health-monitor">
+        <div class="health-badge" [class.healthy]="api.gatewayHealth().status === 'healthy'" [class.unhealthy]="api.gatewayHealth().status === 'unhealthy'">
+          <span class="dot"></span>
+          <span class="label">NODE GATEWAY</span>
+          <span class="latency" *ngIf="api.gatewayHealth().latencyMs">{{ api.gatewayHealth().latencyMs }}ms</span>
+        </div>
+
+        <div class="health-badge" [class.healthy]="api.goHealth().status === 'healthy'" [class.unhealthy]="api.goHealth().status === 'unhealthy'">
+          <span class="dot"></span>
+          <span class="label">GO WORKER</span>
+          <span class="latency" *ngIf="api.goHealth().latencyMs">{{ api.goHealth().latencyMs }}ms</span>
+        </div>
+
+        <button class="btn btn-secondary btn-sm" (click)="refreshHealth()" title="Verificar estado de microservicios">
+          CHECK HEALTH
+        </button>
+      </div>
+
+      <!-- Auth Action -->
+      <div class="auth-box">
+        <ng-container *ngIf="api.token(); else unauthenticated">
+          <span class="auth-status">AUTH: ACTIVE</span>
+          <button class="btn btn-secondary btn-sm" (click)="onLogout()">LOGOUT</button>
+        </ng-container>
+        <ng-template #unauthenticated>
+          <button class="btn btn-primary btn-sm" (click)="showAuthModal.set(true)">LOGIN (JWT)</button>
+        </ng-template>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Grid -->
+  <main class="main-content">
+    <!-- Left Column: Input Form -->
+    <section class="panel input-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">MATRIX INPUT CONFIGURATION</h2>
+      </div>
+
+      <div class="panel-body">
+        <div class="quick-generators">
+          <span class="section-label">QUICK TEMPLATES:</span>
+          <div class="btn-group">
+            <button class="btn btn-secondary btn-xs" (click)="generateRandomMatrix(3, 3)">3x3</button>
+            <button class="btn btn-secondary btn-xs" (click)="generateRandomMatrix(5, 3)">5x3 (Tall)</button>
+            <button class="btn btn-secondary btn-xs" (click)="generateRandomMatrix(6, 6)">6x6</button>
+            <button class="btn btn-secondary btn-xs" (click)="generateRandomMatrix(10, 5)">10x5</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="matrixText" class="form-label">
+            MATRIX DATA (Rows by line, columns by comma or space):
+          </label>
+          <textarea
+            id="matrixText"
+            class="matrix-textarea"
+            rows="10"
+            [ngModel]="matrixInputText()"
+            (ngModelChange)="matrixInputText.set($event)"
+            placeholder="12, -51, 4&#10;6, 167, -68&#10;-4, 24, -41"
+          ></textarea>
+        </div>
+
+        <!-- Error Feedback -->
+        <div class="alert alert-error" *ngIf="api.errorMessage()">
+          <span class="alert-title">ERROR:</span>
+          <span class="alert-desc">{{ api.errorMessage() }}</span>
+        </div>
+
+        <div class="actions-row">
+          <button
+            class="btn btn-primary btn-block"
+            [disabled]="api.isProcessing()"
+            (click)="onSubmitProcess()"
+          >
+            {{ api.isProcessing() ? 'PROCESSING CONCURRENT QR...' : 'EXECUTE QR DECOMPOSITION' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Results & Analytics -->
+    <section class="panel result-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">DECOMPOSITION & STATISTICAL METRICS</h2>
+      </div>
+
+      <div class="panel-body">
+        <div *ngIf="!api.result() && !api.isProcessing()" class="empty-state">
+          <span>NO COMPUTATION PERFORMED. CONFIGURE AND SUBMIT A MATRIX.</span>
+        </div>
+
+        <div *ngIf="api.isProcessing()" class="loading-state">
+          <div class="spinner"></div>
+          <span>COMPUTING GRAM-SCHMIDT QR DECOMPOSITION IN GO ENGINE...</span>
+        </div>
+
+        <div *ngIf="api.result()" class="results-container">
+          <!-- Summary Metrics Cards -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">DIMENSIONS</span>
+              <span class="metric-value">{{ api.result()!.dimensions.rows }} x {{ api.result()!.dimensions.cols }}</span>
+            </div>
+
+            <div class="metric-card">
+              <span class="metric-label">GO EXECUTION TIME</span>
+              <span class="metric-value">{{ api.result()!.timing.goExecutionMs.toFixed(3) }} ms</span>
+            </div>
+
+            <div class="metric-card">
+              <span class="metric-label">TOTAL ORCHESTRATION</span>
+              <span class="metric-value">{{ api.result()!.timing.totalOrchestrationMs }} ms</span>
+            </div>
+
+            <div class="metric-card">
+              <span class="metric-label">RECONSTRUCTION ERROR (||A - QR||_F)</span>
+              <span class="metric-value">{{ api.result()!.qrResult.reconstructionErrorFrobenius.toExponential(4) }}</span>
+            </div>
+
+            <div class="metric-card">
+              <span class="metric-label">ESTIMATED COND(A) (R_max / R_min)</span>
+              <span class="metric-value">{{ conditionNumberEstimate() }}</span>
+            </div>
+
+            <div class="metric-card">
+              <span class="metric-label">ORIGINAL FROBENIUS NORM</span>
+              <span class="metric-value">{{ api.result()!.originalStats.frobeniusNorm.toFixed(4) }}</span>
+            </div>
+          </div>
+
+          <!-- Statistical Comparison Table -->
+          <div class="table-container">
+            <span class="table-title">STATISTICAL COMPARISON TABLE</span>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>METRIC</th>
+                  <th>ORIGINAL MATRIX (A)</th>
+                  <th>ORTHOGONAL MATRIX (Q)</th>
+                  <th>UPPER TRIANGULAR (R)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Arithmetic Mean</td>
+                  <td>{{ api.result()!.originalStats.mean.toFixed(4) }}</td>
+                  <td>{{ api.result()!.qrResult.qStats.mean.toFixed(4) }}</td>
+                  <td>{{ api.result()!.qrResult.rStats.mean.toFixed(4) }}</td>
+                </tr>
+                <tr>
+                  <td>Frobenius Norm</td>
+                  <td>{{ api.result()!.originalStats.frobeniusNorm.toFixed(4) }}</td>
+                  <td>{{ api.result()!.qrResult.qStats.frobeniusNorm.toFixed(4) }}</td>
+                  <td>{{ api.result()!.qrResult.rStats.frobeniusNorm.toFixed(4) }}</td>
+                </tr>
+                <tr>
+                  <td>Minimum Element</td>
+                  <td>{{ api.result()!.originalStats.min.toFixed(4) }}</td>
+                  <td>{{ api.result()!.qrResult.qStats.min.toFixed(4) }}</td>
+                  <td>{{ api.result()!.qrResult.rStats.min.toFixed(4) }}</td>
+                </tr>
+                <tr>
+                  <td>Maximum Element</td>
+                  <td>{{ api.result()!.originalStats.max.toFixed(4) }}</td>
+                  <td>{{ api.result()!.qrResult.qStats.max.toFixed(4) }}</td>
+                  <td>{{ api.result()!.qrResult.rStats.max.toFixed(4) }}</td>
+                </tr>
+                <tr>
+                  <td>Sum of Elements</td>
+                  <td>{{ api.result()!.originalStats.sum.toFixed(4) }}</td>
+                  <td>{{ api.result()!.qrResult.qStats.sum.toFixed(4) }}</td>
+                  <td>{{ api.result()!.qrResult.rStats.sum.toFixed(4) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Matrices Display -->
+          <div class="matrices-display">
+            <div class="matrix-box">
+              <span class="matrix-box-title">ORTHONORMAL MATRIX Q (m x n)</span>
+              <div class="matrix-grid">
+                <div class="matrix-row" *ngFor="let row of api.result()!.qrResult.q">
+                  <span class="matrix-cell" *ngFor="let val of row">{{ val.toFixed(4) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="matrix-box">
+              <span class="matrix-box-title">UPPER TRIANGULAR MATRIX R (n x n)</span>
+              <div class="matrix-grid">
+                <div class="matrix-row" *ngFor="let row of api.result()!.qrResult.r">
+                  <span class="matrix-cell" *ngFor="let val of row">{{ val.toFixed(4) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Login Modal -->
+  <div class="modal-backdrop" *ngIf="showAuthModal()" (click)="showAuthModal.set(false)">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">JWT AUTHENTICATION</h3>
+        <button class="close-btn" (click)="showAuthModal.set(false)">X</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="loginUser">USERNAME:</label>
+          <input
+            id="loginUser"
+            type="text"
+            class="form-input"
+            [ngModel]="username()"
+            (ngModelChange)="username.set($event)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginPass">PASSWORD:</label>
+          <input
+            id="loginPass"
+            type="password"
+            class="form-input"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
+          />
+        </div>
+
+        <div class="alert alert-error" *ngIf="api.errorMessage()">
+          {{ api.errorMessage() }}
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="showAuthModal.set(false)">CANCEL</button>
+          <button class="btn btn-primary" (click)="onLogin()">AUTHENTICATE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
