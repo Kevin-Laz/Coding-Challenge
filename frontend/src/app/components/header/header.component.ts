@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
+import { HEADER_TEXT } from './constants/header.constants';
 
 @Component({
   selector: 'app-header',
@@ -17,6 +18,7 @@ import { ApiService } from '../../services/api.service';
 })
 export class HeaderComponent {
   readonly api = inject(ApiService);
+  readonly text = HEADER_TEXT;
 
   readonly openAuthModal = output<void>();
   readonly logout = output<void>();

@@ -8,6 +8,8 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { ResultPanelComponent } from '../../components/result-panel/result-panel.component';
+import { APP_ROUTES } from '../../constants';
+import { RESULTADOS_PAGE_TEXT } from './constants/resultados.constants';
 
 @Component({
   selector: 'app-resultados-page',
@@ -20,12 +22,12 @@ import { ResultPanelComponent } from '../../components/result-panel/result-panel
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          Volver
+          {{ text.BACK_BUTTON }}
         </button>
 
         @if (api.result()) {
           <div class="result-badge">
-            Matriz {{ api.result()?.dimensions?.rows }} × {{ api.result()?.dimensions?.cols }}
+            {{ text.MATRIX_BADGE_PREFIX }} {{ api.result()?.dimensions?.rows }} × {{ api.result()?.dimensions?.cols }}
           </div>
         }
       </div>
@@ -89,15 +91,16 @@ import { ResultPanelComponent } from '../../components/result-panel/result-panel
 export class ResultadosPage implements OnInit {
   readonly api = inject(ApiService);
   private readonly router = inject(Router);
+  readonly text = RESULTADOS_PAGE_TEXT;
 
   ngOnInit(): void {
     // Si el usuario entra directamente a /resultados sin haber procesado nada
     if (!this.api.result() && !this.api.isProcessing()) {
-      this.router.navigate(['/']);
+      this.router.navigate([APP_ROUTES.HOME]);
     }
   }
 
   goBack(): void {
-    this.router.navigate(['/']);
+    this.router.navigate([APP_ROUTES.HOME]);
   }
 }

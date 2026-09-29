@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
+import { RESULT_PANEL_TEXT } from './constants/result-panel.constants';
 
 @Component({
   selector: 'app-result-panel',
@@ -17,6 +18,7 @@ import { ApiService } from '../../services/api.service';
 })
 export class ResultPanelComponent {
   readonly api = inject(ApiService);
+  readonly text = RESULT_PANEL_TEXT;
 
   readonly conditionNumber = computed(() => {
     const res = this.api.result();
@@ -29,7 +31,9 @@ export class ResultPanelComponent {
       if (d > maxDiag) maxDiag = d;
       if (d < minDiag) minDiag = d;
     }
-    return minDiag > 0 ? (maxDiag / minDiag).toFixed(4) : 'Infinito (Singular)';
+    return minDiag > 0
+      ? (maxDiag / minDiag).toFixed(4)
+      : RESULT_PANEL_TEXT.SINGULAR_CONDITION;
   });
 
   readonly sparsityQ = computed(() => {
@@ -44,6 +48,8 @@ export class ResultPanelComponent {
         if (Math.abs(v) < 1e-10) zeros++;
       }
     }
-    return rows * cols > 0 ? ((zeros / (rows * cols)) * 100).toFixed(1) : '0.0';
+    return rows * cols > 0
+      ? ((zeros / (rows * cols)) * 100).toFixed(1)
+      : RESULT_PANEL_TEXT.DEFAULT_SPARSITY;
   });
 }

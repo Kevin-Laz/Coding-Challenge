@@ -9,6 +9,8 @@ import { ApiService } from '../../services/api.service';
 import { Matrix2D } from '../../models/matrix.models';
 import { MatrixInputComponent } from '../../components/matrix-input/matrix-input.component';
 import { InfoStatusPanelComponent } from '../../components/info-status-panel/info-status-panel.component';
+import { APP_ROUTES, GLOBAL_MESSAGES } from '../../constants';
+import { MATRIZ_PAGE_TEXT } from './constants/matriz.constants';
 
 @Component({
   selector: 'app-matriz-page',
@@ -17,9 +19,9 @@ import { InfoStatusPanelComponent } from '../../components/info-status-panel/inf
   template: `
     <div class="page-container">
       <div class="page-header">
-        <h1 class="page-title">Configuración y Entrada de Matriz</h1>
+        <h1 class="page-title">{{ text.TITLE }}</h1>
         <p class="page-desc">
-          Configure las dimensiones o pegue los datos para procesar la descomposición QR.
+          {{ text.DESCRIPTION }}
         </p>
       </div>
 
@@ -76,17 +78,18 @@ import { InfoStatusPanelComponent } from '../../components/info-status-panel/inf
 export class MatrizPage {
   readonly api = inject(ApiService);
   private readonly router = inject(Router);
+  readonly text = MATRIZ_PAGE_TEXT;
 
   async onMatrixSubmit(matrix: Matrix2D): Promise<void> {
     // Si no está autenticado, abrir modal de autenticación
     if (!this.api.token()) {
-      this.api.errorMessage.set('Debe iniciar sesión para procesar matrices.');
+      this.api.errorMessage.set(GLOBAL_MESSAGES.AUTH_REQUIRED);
       this.api.requestAuthModal();
       return;
     }
 
     // Redirigir de inmediato a /resultados para ver la pantalla de carga
-    this.router.navigate(['/resultados']);
+    this.router.navigate([APP_ROUTES.RESULTADOS_PATH]);
     await this.api.processMatrix(matrix);
   }
 

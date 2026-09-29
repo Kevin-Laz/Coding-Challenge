@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { INFO_STATUS_TEXT } from './constants/info-status-panel.constants';
 
 @Component({
   selector: 'app-info-status-panel',
@@ -11,19 +12,19 @@ import { CommonModule } from '@angular/common';
       [class.has-error]="errorMessage()"
       role="region"
       aria-live="polite"
-      aria-label="Panel de estado del sistema y validaciones"
+      [attr.aria-label]="text.REGION_ARIA_LABEL"
     >
       @if (errorMessage()) {
         <div class="status-content status-error">
           <div class="status-text-block">
-            <span class="status-label">Validación / Error detectado</span>
+            <span class="status-label">{{ text.ERROR_LABEL }}</span>
             <p class="status-message">{{ errorMessage() }}</p>
           </div>
         </div>
       } @else {
         <div class="status-content status-info">
           <div class="status-text-block">
-            <span class="status-label">Guía de navegación y uso</span>
+            <span class="status-label">{{ text.INFO_LABEL }}</span>
             <p class="status-message">
               Use las flechas del teclado <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> o la tecla <kbd>Enter</kbd> para desplazarse ágilmente por las celdas. La descomposición QR calculará la matriz ortogonal <strong>Q</strong> y la triangular superior <strong>R</strong>.
             </p>
@@ -101,4 +102,5 @@ import { CommonModule } from '@angular/common';
 })
 export class InfoStatusPanelComponent {
   readonly errorMessage = input<string | null>(null);
+  readonly text = INFO_STATUS_TEXT;
 }

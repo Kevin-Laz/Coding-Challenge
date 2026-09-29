@@ -1,12 +1,12 @@
 <div class="input-panel">
   <div class="panel-header">
-    <h2 class="panel-title">Configuracion de Matriz</h2>
-    <p class="panel-desc">Ingrese los datos de la matriz para ejecutar la descomposicion QR</p>
+    <h2 class="panel-title">{{ text.TITLE }}</h2>
+    <p class="panel-desc">{{ text.DESC }}</p>
   </div>
 
   <!-- Plantillas rapidas -->
   <div class="quick-templates">
-    <span class="section-label">Plantillas rapidas</span>
+    <span class="section-label">{{ text.QUICK_TEMPLATES_LABEL }}</span>
     <div class="template-grid">
       @for (tpl of quickTemplates; track tpl.label) {
         <button class="btn btn-ghost btn-xs" (click)="applyTemplate(tpl.rows, tpl.cols)">
@@ -24,7 +24,7 @@
       [class.active]="activeTab() === 'grid'"
       (click)="setTab('grid')"
     >
-      Cuadricula interactiva
+      {{ text.TAB_GRID }}
     </button>
     <button
       class="tab"
@@ -32,7 +32,7 @@
       [class.active]="activeTab() === 'text'"
       (click)="setTab('text')"
     >
-      Texto libre
+      {{ text.TAB_TEXT }}
     </button>
     <button
       class="tab"
@@ -40,7 +40,7 @@
       [class.active]="activeTab() === 'json'"
       (click)="setTab('json')"
     >
-      JSON directo
+      {{ text.TAB_JSON }}
     </button>
   </div>
 
@@ -49,7 +49,7 @@
     <div class="tab-content">
       <div class="dimension-controls">
         <div class="dim-group">
-          <label class="form-label" for="gridRows">Filas</label>
+          <label class="form-label" for="gridRows">{{ text.ROWS_LABEL }}</label>
           <input
             id="gridRows"
             type="number"
@@ -62,7 +62,7 @@
         </div>
         <span class="dim-separator">×</span>
         <div class="dim-group">
-          <label class="form-label" for="gridCols">Columnas</label>
+          <label class="form-label" for="gridCols">{{ text.COLS_LABEL }}</label>
           <input
             id="gridCols"
             type="number"
@@ -74,10 +74,10 @@
           />
         </div>
         <button type="button" class="btn btn-outline btn-sm btn-fixed" (click)="fillRandomGrid()">
-          Rellenar aleatorio
+          {{ text.FILL_RANDOM_BTN }}
         </button>
         <button type="button" class="btn btn-ghost btn-sm btn-fixed" (click)="clearGrid()">
-          Borrar datos
+          {{ text.CLEAR_BTN }}
         </button>
       </div>
 
@@ -110,7 +110,7 @@
           }
         </div>
         @if (gridRows() === 0 || gridCols() === 0) {
-          <p class="grid-empty-hint">Configure las dimensiones y haga clic en Generar cuadrícula.</p>
+          <p class="grid-empty-hint">{{ text.GRID_EMPTY_HINT }}</p>
         }
       </div>
     </div>
@@ -120,7 +120,7 @@
   @if (activeTab() === 'text') {
     <div class="tab-content">
       <label for="matrixText" class="form-label">
-        Filas separadas por salto de linea, valores por coma o espacio
+        {{ text.TEXT_LABEL }}
       </label>
       <textarea
         id="matrixText"
@@ -137,7 +137,7 @@
   @if (activeTab() === 'json') {
     <div class="tab-content">
       <label for="matrixJson" class="form-label">
-        Array de arrays de numeros en formato JSON
+        {{ text.JSON_LABEL }}
       </label>
       <textarea
         id="matrixJson"
@@ -164,9 +164,9 @@
     >
       @if (isProcessing()) {
         <span class="btn-spinner"></span>
-        <span>Procesando matriz...</span>
+        <span>{{ text.PROCESSING_BTN }}</span>
       } @else {
-        <span>Ejecutar descomposición QR</span>
+        <span>{{ text.SUBMIT_BTN }}</span>
       }
     </button>
   </div>

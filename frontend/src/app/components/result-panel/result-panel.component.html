@@ -1,20 +1,20 @@
 <div class="result-panel">
   <div class="panel-header">
-    <h2 class="panel-title">Resultados de la Descomposicion</h2>
-    <p class="panel-desc">Metricas estadisticas y matrices Q y R resultantes</p>
+    <h2 class="panel-title">{{ text.TITLE }}</h2>
+    <p class="panel-desc">{{ text.DESC }}</p>
   </div>
 
   <!-- Estado vacio -->
   @if (!api.result() && !api.isProcessing()) {
     <div class="empty-state">
-      <p class="empty-title">Sin resultados</p>
-      <p class="empty-desc">Configure una matriz en la vista de entrada y ejecute la descomposición QR.</p>
+      <p class="empty-title">{{ text.EMPTY_TITLE }}</p>
+      <p class="empty-desc">{{ text.EMPTY_DESC }}</p>
     </div>
   }
 
   <!-- Skeleton loader mientras calcula: replica estructura exacta de results-container -->
   @if (api.isProcessing()) {
-    <div class="results-container skeleton-container" aria-busy="true" aria-label="Calculando descomposición QR">
+    <div class="results-container skeleton-container" aria-busy="true" [attr.aria-label]="text.LOADING_ARIA">
 
       <!-- Skeleton Métricas: 6 cards igual que el real -->
       <div class="metrics-grid">
@@ -72,76 +72,76 @@
       <!-- Tarjetas de metricas -->
       <div class="metrics-grid">
         <div class="metric-card">
-          <span class="metric-label">Dimensiones</span>
+          <span class="metric-label">{{ text.DIMENSIONS_LABEL }}</span>
           <span class="metric-value">{{ result.dimensions.rows }} x {{ result.dimensions.cols }}</span>
         </div>
 
         <div class="metric-card">
-          <span class="metric-label">Tiempo motor Go</span>
+          <span class="metric-label">{{ text.GO_TIME_LABEL }}</span>
           <span class="metric-value">{{ result.timing.goExecutionMs.toFixed(3) }} ms</span>
         </div>
 
         <div class="metric-card">
-          <span class="metric-label">Orquestacion total</span>
+          <span class="metric-label">{{ text.ORCHESTRATION_TIME_LABEL }}</span>
           <span class="metric-value">{{ result.timing.totalOrchestrationMs }} ms</span>
         </div>
 
         <div class="metric-card">
-          <span class="metric-label">Error de reconstruccion</span>
+          <span class="metric-label">{{ text.RECONSTRUCTION_ERROR_LABEL }}</span>
           <span class="metric-value accent">{{ result.qrResult.reconstructionErrorFrobenius.toExponential(4) }}</span>
         </div>
 
         <div class="metric-card">
-          <span class="metric-label">Numero de condicion est.</span>
+          <span class="metric-label">{{ text.CONDITION_NUMBER_LABEL }}</span>
           <span class="metric-value">{{ conditionNumber() }}</span>
         </div>
 
         <div class="metric-card">
-          <span class="metric-label">Norma de Frobenius original</span>
+          <span class="metric-label">{{ text.FROBENIUS_NORM_LABEL }}</span>
           <span class="metric-value">{{ result.originalStats.frobeniusNorm.toFixed(4) }}</span>
         </div>
       </div>
 
       <!-- Tabla comparativa -->
       <div class="section-block">
-        <h3 class="section-title">Tabla comparativa de estadisticas</h3>
+        <h3 class="section-title">{{ text.STATS_TABLE_TITLE }}</h3>
         <div class="table-wrapper">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Metrica</th>
-                <th>Matriz original (A)</th>
-                <th>Matriz ortogonal (Q)</th>
-                <th>Triangular superior (R)</th>
+                <th>{{ text.COL_METRIC }}</th>
+                <th>{{ text.COL_ORIGINAL }}</th>
+                <th>{{ text.COL_Q }}</th>
+                <th>{{ text.COL_R }}</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Media aritmetica</td>
+                <td>{{ text.ROW_MEAN }}</td>
                 <td>{{ result.originalStats.mean.toFixed(4) }}</td>
                 <td>{{ result.qrResult.qStats.mean.toFixed(4) }}</td>
                 <td>{{ result.qrResult.rStats.mean.toFixed(4) }}</td>
               </tr>
               <tr>
-                <td>Norma de Frobenius</td>
+                <td>{{ text.ROW_FROBENIUS }}</td>
                 <td>{{ result.originalStats.frobeniusNorm.toFixed(4) }}</td>
                 <td>{{ result.qrResult.qStats.frobeniusNorm.toFixed(4) }}</td>
                 <td>{{ result.qrResult.rStats.frobeniusNorm.toFixed(4) }}</td>
               </tr>
               <tr>
-                <td>Elemento minimo</td>
+                <td>{{ text.ROW_MIN }}</td>
                 <td>{{ result.originalStats.min.toFixed(4) }}</td>
                 <td>{{ result.qrResult.qStats.min.toFixed(4) }}</td>
                 <td>{{ result.qrResult.rStats.min.toFixed(4) }}</td>
               </tr>
               <tr>
-                <td>Elemento maximo</td>
+                <td>{{ text.ROW_MAX }}</td>
                 <td>{{ result.originalStats.max.toFixed(4) }}</td>
                 <td>{{ result.qrResult.qStats.max.toFixed(4) }}</td>
                 <td>{{ result.qrResult.rStats.max.toFixed(4) }}</td>
               </tr>
               <tr>
-                <td>Suma de elementos</td>
+                <td>{{ text.ROW_SUM }}</td>
                 <td>{{ result.originalStats.sum.toFixed(4) }}</td>
                 <td>{{ result.qrResult.qStats.sum.toFixed(4) }}</td>
                 <td>{{ result.qrResult.rStats.sum.toFixed(4) }}</td>
@@ -153,12 +153,12 @@
 
       <!-- Matrices Q y R -->
       <div class="section-block">
-        <h3 class="section-title">Matrices resultantes</h3>
+        <h3 class="section-title">{{ text.MATRICES_TITLE }}</h3>
         <div class="matrices-grid">
           <div class="matrix-box">
             <div class="matrix-box-header">
-              <span class="matrix-box-title">Matriz ortonormal Q (m x n)</span>
-              <span class="matrix-box-hint">Columnas ortogonales, norma unitaria</span>
+              <span class="matrix-box-title">{{ text.MATRIX_Q_TITLE }}</span>
+              <span class="matrix-box-hint">{{ text.MATRIX_Q_HINT }}</span>
             </div>
             <div class="matrix-scroll">
               @for (row of result.qrResult.q; track $index) {
@@ -173,8 +173,8 @@
 
           <div class="matrix-box">
             <div class="matrix-box-header">
-              <span class="matrix-box-title">Matriz triangular R (n x n)</span>
-              <span class="matrix-box-hint">Triangular superior con diagonal positiva</span>
+              <span class="matrix-box-title">{{ text.MATRIX_R_TITLE }}</span>
+              <span class="matrix-box-hint">{{ text.MATRIX_R_HINT }}</span>
             </div>
             <div class="matrix-scroll">
               @for (row of result.qrResult.r; track $index) {

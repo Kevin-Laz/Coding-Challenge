@@ -8,6 +8,14 @@ import {
   ProcessedMatrixResponse,
   ServiceHealthStatus,
 } from '../models/matrix.models';
+import {
+  API_ENDPOINTS,
+  GLOBAL_MESSAGES,
+  HEALTH_CHECK_INTERVAL_MS,
+  HTTP_HEADERS,
+  SERVICE_NAMES,
+  STORAGE_KEYS,
+} from '../constants';
 
 @Injectable({
   providedIn: 'root',
@@ -20,17 +28,19 @@ export class ApiService {
   readonly goServiceUrl = signal<string>(environment.goServiceUrl);
 
   // Token JWT en memoria / reactivo con Signals
-  readonly token = signal<string | null>(localStorage.getItem('qr_jwt_token'));
+  readonly token = signal<string | null>(
+    localStorage.getItem(STORAGE_KEYS.JWT_TOKEN)
+  );
 
   // Estados de salud de los microservicios
   readonly gatewayHealth = signal<ServiceHealthStatus>({
-    service: 'Gateway (Node.js)',
+    service: SERVICE_NAMES.GATEWAY,
     status: 'unknown',
     lastChecked: '-',
   });
 
   readonly goHealth = signal<ServiceHealthStatus>({
-    service: 'QR Engine (Go)',
+    service: SERVICE_NAMES.QR_ENGINE,
     status: 'unknown',
     lastChecked: '-',
   });
@@ -48,18 +58,18 @@ export class ApiService {
   constructor() {
     // Comprobar salud inmediatamente al cargar
     this.checkHealth();
-    // Programar comprobación periódica cada 5 minutos (300.000 ms)
+    // Programar comprobación periódica
     setInterval(() => {
       this.checkHealth();
-    }, 5 * 60 * 1000);
+    }, HEALTH_CHECK_INTERVAL_MS);
   }
 
   setToken(token: string | null): void {
     this.token.set(token);
     if (token) {
-      localStorage.setItem('qr_jwt_token', token);
+      localStorage.setItem(STORAGE_KEYS.JWT_TOKEN, token);
     } else {
-      localStorage.removeItem('qr_jwt_token');
+      localStorage.removeItem(STORAGE_KEYS.JWT_TOKEN);
     }
   }
 
@@ -67,16 +77,19 @@ export class ApiService {
     this.errorMessage.set(null);
     try {
       const res = await firstValueFrom(
-        this.http.post<LoginResponse>(`${this.gatewayUrl()}/auth/login`, {
-          username,
-          password,
-        })
+        this.http.post<LoginResponse>(
+          `${this.gatewayUrl()}${API_ENDPOINTS.AUTH_LOGIN}`,
+          {
+            username,
+            password,
+          }
+        )
       );
       this.setToken(res.token);
       return true;
     } catch (err: unknown) {
       const msg = this.extractErrorMessage(err);
-      this.errorMessage.set(`Fallo de autenticación: ${msg}`);
+      this.errorMessage.set(`${GLOBAL_MESSAGES.AUTH_FAILED_PREFIX}${msg}`);
       return false;
     }
   }
@@ -87,18 +100,18 @@ export class ApiService {
     try {
       await firstValueFrom(
         this.http.get<{ status: string; service: string }>(
-          `${this.gatewayUrl()}/health`
+          `${this.gatewayUrl()}${API_ENDPOINTS.HEALTH}`
         )
       );
       this.gatewayHealth.set({
-        service: 'Gateway (Node.js)',
+        service: SERVICE_NAMES.GATEWAY,
         status: 'healthy',
         lastChecked: new Date().toLocaleTimeString(),
         latencyMs: Math.round(performance.now() - startGateway),
       });
     } catch {
       this.gatewayHealth.set({
-        service: 'Gateway (Node.js)',
+        service: SERVICE_NAMES.GATEWAY,
         status: 'unhealthy',
         lastChecked: new Date().toLocaleTimeString(),
       });
@@ -109,18 +122,18 @@ export class ApiService {
     try {
       await firstValueFrom(
         this.http.get<{ status: string; service: string }>(
-          `${this.goServiceUrl()}/health`
+          `${this.goServiceUrl()}${API_ENDPOINTS.HEALTH}`
         )
       );
       this.goHealth.set({
-        service: 'QR Engine (Go)',
+        service: SERVICE_NAMES.QR_ENGINE,
         status: 'healthy',
         lastChecked: new Date().toLocaleTimeString(),
         latencyMs: Math.round(performance.now() - startGo),
       });
     } catch {
       this.goHealth.set({
-        service: 'QR Engine (Go)',
+        service: SERVICE_NAMES.QR_ENGINE,
         status: 'unhealthy',
         lastChecked: new Date().toLocaleTimeString(),
       });
@@ -135,13 +148,16 @@ export class ApiService {
     const currentToken = this.token();
     let headers = new HttpHeaders();
     if (currentToken) {
-      headers = headers.set('Authorization', `Bearer ${currentToken}`);
+      headers = headers.set(
+        HTTP_HEADERS.AUTHORIZATION,
+        `${HTTP_HEADERS.BEARER_PREFIX}${currentToken}`
+      );
     }
 
     try {
       const response = await firstValueFrom(
         this.http.post<ProcessedMatrixResponse>(
-          `${this.gatewayUrl()}/process`,
+          `${this.gatewayUrl()}${API_ENDPOINTS.PROCESS}`,
           { matrix },
           { headers }
         )
@@ -158,7 +174,10 @@ export class ApiService {
 
   private extractErrorMessage(err: unknown): string {
     if (err && typeof err === 'object' && 'error' in err) {
-      const httpError = err as { error?: { error?: string; details?: string }; message?: string };
+      const httpError = err as {
+        error?: { error?: string; details?: string };
+        message?: string;
+      };
       if (httpError.error?.error) {
         return httpError.error.details
           ? `${httpError.error.error} (${httpError.error.details})`
@@ -166,6 +185,6 @@ export class ApiService {
       }
       if (httpError.message) return httpError.message;
     }
-    return 'Error de red o servidor no disponible';
+    return GLOBAL_MESSAGES.NETWORK_OR_SERVER_ERROR;
   }
 }

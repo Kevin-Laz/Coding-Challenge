@@ -11,8 +11,15 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Matrix2D } from '../../models/matrix.models';
-
-type InputTab = 'grid' | 'text' | 'json';
+import {
+  INPUT_TABS,
+  InputTab,
+  MATRIX_DEFAULTS,
+  MATRIX_DIMENSIONS,
+  MATRIX_INPUT_TEXT,
+  MATRIX_MESSAGES,
+  QUICK_TEMPLATES,
+} from './constants/matrix-input.constants';
 
 @Component({
   selector: 'app-matrix-input',
@@ -26,29 +33,31 @@ export class MatrixInputComponent {
   readonly isProcessing = input<boolean>(false);
   readonly submitMatrix = output<Matrix2D>();
   readonly errorChange = output<string | null>();
+  readonly text = MATRIX_INPUT_TEXT;
 
   // Referencias a las celdas del grid para enfocar con flechas/enter
   readonly cellInputs = viewChildren<ElementRef<HTMLInputElement>>('cellInput');
 
   // Tab activo
-  readonly activeTab = signal<InputTab>('grid');
+  readonly activeTab = signal<InputTab>(INPUT_TABS.GRID);
 
   // --- Tab: Grid interactivo ---
-  readonly gridRows = signal<number>(3);
-  readonly gridCols = signal<number>(3);
+  readonly gridRows = signal<number>(MATRIX_DIMENSIONS.DEFAULT_ROWS);
+  readonly gridCols = signal<number>(MATRIX_DIMENSIONS.DEFAULT_COLS);
 
   // Valores de las celdas como matriz de strings
   readonly cellValues = signal<string[][]>(
-    this.buildEmptyGrid(3, 3)
+    this.buildEmptyGrid(
+      MATRIX_DIMENSIONS.DEFAULT_ROWS,
+      MATRIX_DIMENSIONS.DEFAULT_COLS
+    )
   );
 
   // --- Tab: Texto libre ---
-  readonly textInput = signal<string>('12, -51, 4\n6, 167, -68\n-4, 24, -41');
+  readonly textInput = signal<string>(MATRIX_DEFAULTS.TEXT_INPUT);
 
   // --- Tab: JSON ---
-  readonly jsonInput = signal<string>(
-    JSON.stringify([[12, -51, 4], [6, 167, -68], [-4, 24, -41]], null, 2)
-  );
+  readonly jsonInput = signal<string>(MATRIX_DEFAULTS.JSON_INPUT);
 
   readonly jsonError = signal<string | null>(null);
 
@@ -62,26 +71,26 @@ export class MatrixInputComponent {
   );
 
   // Plantillas rápidas
-  readonly quickTemplates = [
-    { label: '2×2', rows: 2, cols: 2 },
-    { label: '3×3', rows: 3, cols: 3 },
-    { label: '4×4', rows: 4, cols: 4 },
-    { label: '5×3', rows: 5, cols: 3 },
-    { label: '6×6', rows: 6, cols: 6 },
-  ];
+  readonly quickTemplates = QUICK_TEMPLATES;
 
   setTab(tab: InputTab): void {
     this.activeTab.set(tab);
   }
 
   setGridRows(val: number): void {
-    const rows = Math.max(1, Math.min(30, val || 1));
+    const rows = Math.max(
+      MATRIX_DIMENSIONS.MIN,
+      Math.min(MATRIX_DIMENSIONS.MAX, val || MATRIX_DIMENSIONS.MIN)
+    );
     this.gridRows.set(rows);
     this.rebuildGridPreserving(rows, this.gridCols());
   }
 
   setGridCols(val: number): void {
-    const cols = Math.max(1, Math.min(30, val || 1));
+    const cols = Math.max(
+      MATRIX_DIMENSIONS.MIN,
+      Math.min(MATRIX_DIMENSIONS.MAX, val || MATRIX_DIMENSIONS.MIN)
+    );
     this.gridCols.set(cols);
     this.rebuildGridPreserving(this.gridRows(), cols);
   }
@@ -89,7 +98,7 @@ export class MatrixInputComponent {
   clearGrid(): void {
     this.cellValues.set(this.buildEmptyGrid(this.gridRows(), this.gridCols()));
     this.textInput.set('');
-    this.jsonInput.set('[\n  []\n]');
+    this.jsonInput.set(MATRIX_DEFAULTS.EMPTY_JSON);
     this.errorChange.emit(null);
   }
 
@@ -110,7 +119,7 @@ export class MatrixInputComponent {
     this.gridRows.set(rows);
     this.gridCols.set(cols);
     this.cellValues.set(this.buildEmptyGrid(rows, cols));
-    this.activeTab.set('grid');
+    this.activeTab.set(INPUT_TABS.GRID);
   }
 
   fillRandomGrid(): void {
@@ -203,22 +212,22 @@ export class MatrixInputComponent {
     const tab = this.activeTab();
     let matrix: Matrix2D | null = null;
 
-    if (tab === 'grid') {
+    if (tab === INPUT_TABS.GRID) {
       matrix = this.parseGrid();
-    } else if (tab === 'text') {
+    } else if (tab === INPUT_TABS.TEXT) {
       matrix = this.parseText(this.textInput());
-    } else if (tab === 'json') {
+    } else if (tab === INPUT_TABS.JSON) {
       matrix = this.parseJson(this.jsonInput());
       if (!matrix) return;
     }
 
     if (!matrix) {
-      this.errorChange.emit('El formato de la matriz es inválido. Verifique que no haya celdas vacías o valores no numéricos.');
+      this.errorChange.emit(MATRIX_MESSAGES.INVALID_FORMAT);
       return;
     }
 
     if (!this.validateMatrixShape(matrix)) {
-      this.errorChange.emit('Todas las filas deben tener la misma cantidad de columnas.');
+      this.errorChange.emit(MATRIX_MESSAGES.UNEQUAL_COLUMNS);
       return;
     }
 
@@ -282,14 +291,13 @@ export class MatrixInputComponent {
             row.every((v) => typeof v === 'number')
         )
       ) {
-        const err = 'El JSON debe ser un array de arrays de números. Ej: [[1,2],[3,4]]';
-        this.jsonError.set(err);
-        this.errorChange.emit(err);
+        this.jsonError.set(MATRIX_MESSAGES.JSON_STRUCTURE_ERROR);
+        this.errorChange.emit(MATRIX_MESSAGES.JSON_STRUCTURE_ERROR);
         return null;
       }
       return parsed as Matrix2D;
     } catch (e) {
-      const err = 'JSON inválido: ' + (e instanceof Error ? e.message : String(e));
+      const err = `${MATRIX_MESSAGES.JSON_SYNTAX_ERROR_PREFIX}${e instanceof Error ? e.message : String(e)}`;
       this.jsonError.set(err);
       this.errorChange.emit(err);
       return null;
