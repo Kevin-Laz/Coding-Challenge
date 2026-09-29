@@ -15,6 +15,7 @@
 
 import { Request, Response } from "express";
 import { ProcessMatrixUseCase } from "../../../core/services/process_matrix";
+import { HTTP_CONSTANTS } from "../../../constants/http.constants";
 
 export class MatrixController {
   constructor(private readonly processMatrixUseCase: ProcessMatrixUseCase) {}
@@ -28,7 +29,7 @@ export class MatrixController {
 
       if (!matrix) {
         res.status(400).json({
-          error: "Petición incompleta: El campo 'matrix' es requerido en el cuerpo JSON.",
+          error: HTTP_CONSTANTS.CONTROLLER_MESSAGES.MISSING_MATRIX_FIELD,
         });
         return;
       }
@@ -41,34 +42,38 @@ export class MatrixController {
 
         // Identificar si la falla fue de validación matemática (400) o de comunicación HTTP (502)
         if (
-          message.includes("La matriz") ||
-          message.includes("Restricción matemática") ||
-          message.includes("Asimetría dimensional")
+          HTTP_CONSTANTS.ERROR_SUBSTRINGS.DOMAIN.some((substr) =>
+            message.includes(substr)
+          )
         ) {
           res.status(400).json({
-            error: "Error de validación dimensional o de dominio matricial",
+            error: HTTP_CONSTANTS.CONTROLLER_MESSAGES.DOMAIN_VALIDATION_ERROR,
             details: message,
           });
           return;
         }
 
-        if (message.includes("Falla en la comunicación") || message.includes("Timeout")) {
+        if (
+          HTTP_CONSTANTS.ERROR_SUBSTRINGS.NETWORK.some((substr) =>
+            message.includes(substr)
+          )
+        ) {
           res.status(502).json({
-            error: "Bad Gateway: Imposible comunicarse con el motor QR de Go",
+            error: HTTP_CONSTANTS.CONTROLLER_MESSAGES.BAD_GATEWAY_ERROR,
             details: message,
           });
           return;
         }
 
         res.status(500).json({
-          error: "Error interno del servidor Gateway",
+          error: HTTP_CONSTANTS.CONTROLLER_MESSAGES.INTERNAL_SERVER_ERROR,
           details: message,
         });
         return;
       }
 
       res.status(500).json({
-        error: "Error no controlado durante el procesamiento",
+        error: HTTP_CONSTANTS.CONTROLLER_MESSAGES.UNHANDLED_ERROR,
       });
     }
   };

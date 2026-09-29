@@ -16,14 +16,16 @@
 
 import { Matrix2D, QRDecompositionResponse } from "../../core/domain/matrix";
 import { IQRClientPort } from "../../core/ports/qr_client.port";
+import { CLIENT_CONSTANTS } from "../../constants/client.constants";
 
 export class QRHttpClientAdapter implements IQRClientPort {
   private readonly baseUrl: string;
   private readonly timeoutMs: number;
 
   constructor(
-    baseUrl: string = process.env.QR_SERVICE_URL || "http://localhost:8080/qr/decompose",
-    timeoutMs: number = 30000
+    baseUrl: string = process.env.QR_SERVICE_URL ||
+      CLIENT_CONSTANTS.QR_SERVICE.DEFAULT_BASE_URL,
+    timeoutMs: number = CLIENT_CONSTANTS.QR_SERVICE.DEFAULT_TIMEOUT_MS
   ) {
     this.baseUrl = baseUrl;
     this.timeoutMs = timeoutMs;
@@ -35,10 +37,10 @@ export class QRHttpClientAdapter implements IQRClientPort {
 
     try {
       const response = await fetch(this.baseUrl, {
-        method: "POST",
+        method: CLIENT_CONSTANTS.QR_SERVICE.METHOD,
         headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
+          "Content-Type": CLIENT_CONSTANTS.QR_SERVICE.CONTENT_TYPE_JSON,
+          "Accept": CLIENT_CONSTANTS.QR_SERVICE.CONTENT_TYPE_JSON,
         },
         body: JSON.stringify({ matrix }),
         signal: controller.signal,
@@ -47,7 +49,10 @@ export class QRHttpClientAdapter implements IQRClientPort {
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
-          `El servicio QR en Go devolvió un status ${response.status}: ${errorText}`
+          CLIENT_CONSTANTS.QR_SERVICE.ERRORS.SERVICE_STATUS(
+            response.status,
+            errorText
+          )
         );
       }
 
@@ -55,14 +60,16 @@ export class QRHttpClientAdapter implements IQRClientPort {
       return data;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        if (error.name === "AbortError") {
+        if (error.name === CLIENT_CONSTANTS.QR_SERVICE.ABORT_ERROR_NAME) {
           throw new Error(
-            `Timeout de red (${this.timeoutMs}ms) al comunicarse con el microservicio QR en Go.`
+            CLIENT_CONSTANTS.QR_SERVICE.ERRORS.TIMEOUT(this.timeoutMs)
           );
         }
-        throw new Error(`Falla en la comunicación con Go QR Service: ${error.message}`);
+        throw new Error(
+          CLIENT_CONSTANTS.QR_SERVICE.ERRORS.COMMUNICATION_FAILURE(error.message)
+        );
       }
-      throw new Error("Error desconocido al invocar el microservicio externo QR.");
+      throw new Error(CLIENT_CONSTANTS.QR_SERVICE.ERRORS.UNKNOWN);
     } finally {
       clearTimeout(timeoutId);
     }

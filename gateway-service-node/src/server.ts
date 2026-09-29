@@ -20,13 +20,15 @@ import { MatrixController } from "./adapters/http/controllers/matrix.controller"
 import { QRHttpClientAdapter } from "./adapters/secondary/qr_http_client";
 import { createApp } from "./app";
 import { DefaultStatsService, ProcessMatrixUseCase } from "./core/services/process_matrix";
+import { CONFIG_CONSTANTS } from "./constants/config.constants";
 
 function bootstrap() {
-  const port = process.env.PORT || 3000;
-  const qrServiceUrl = process.env.QR_SERVICE_URL || "http://localhost:8080/qr/decompose";
+  const port = process.env.PORT || CONFIG_CONSTANTS.SERVER.DEFAULT_PORT;
+  const qrServiceUrl =
+    process.env.QR_SERVICE_URL || CONFIG_CONSTANTS.SERVER.DEFAULT_QR_SERVICE_URL;
 
-  console.log("Iniciando API Gateway de Orquestación Matricial (Express + TypeScript)...");
-  console.log(`Configuración del Microservicio QR Go: ${qrServiceUrl}`);
+  console.log(CONFIG_CONSTANTS.LOGS.STARTING);
+  console.log(CONFIG_CONSTANTS.LOGS.QR_CONFIG(qrServiceUrl));
 
   // 1. Instanciar Adaptador Secundario (Cliente HTTP externo hacia Go)
   const qrClientAdapter = new QRHttpClientAdapter(qrServiceUrl);
@@ -44,21 +46,25 @@ function bootstrap() {
   const app = createApp(matrixController);
 
   const server = app.listen(port, () => {
-    console.log(`API Gateway escuchando activamente en el puerto ${port}`);
-    console.log(`Ruta principal lista: POST http://localhost:${port}/process`);
+    console.log(CONFIG_CONSTANTS.LOGS.LISTENING(port));
+    console.log(CONFIG_CONSTANTS.LOGS.PRIMARY_ROUTE_READY(port));
   });
 
   // Manejo de apagado controlado (Graceful Shutdown)
   const handleShutdown = (signal: string) => {
-    console.log(`Señal ${signal} recibida. Cerrando conexiones HTTP del Gateway...`);
+    console.log(CONFIG_CONSTANTS.LOGS.SHUTDOWN_SIGNAL(signal));
     server.close(() => {
-      console.log("API Gateway finalizado correctamente.");
+      console.log(CONFIG_CONSTANTS.LOGS.SHUTDOWN_SUCCESS);
       process.exit(0);
     });
   };
 
-  process.on("SIGINT", () => handleShutdown("SIGINT"));
-  process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+  process.on(CONFIG_CONSTANTS.SERVER.SIGNALS.SIGINT, () =>
+    handleShutdown(CONFIG_CONSTANTS.SERVER.SIGNALS.SIGINT)
+  );
+  process.on(CONFIG_CONSTANTS.SERVER.SIGNALS.SIGTERM, () =>
+    handleShutdown(CONFIG_CONSTANTS.SERVER.SIGNALS.SIGTERM)
+  );
 }
 
 bootstrap();

@@ -6,20 +6,21 @@
 
 import { Router } from "express";
 import { MatrixController } from "./controllers/matrix.controller";
+import { HTTP_CONSTANTS } from "../../constants/http.constants";
 
 export function createRouter(matrixController: MatrixController): Router {
   const router = Router();
 
   // Endpoint de comprobación de salud del Gateway
-  router.get("/health", (_req, res) => {
+  router.get(HTTP_CONSTANTS.ROUTES.HEALTH, (_req, res) => {
     res.status(200).json({
-      status: "healthy",
-      service: "gateway-service-node",
+      status: HTTP_CONSTANTS.HEALTH.STATUS_HEALTHY,
+      service: HTTP_CONSTANTS.HEALTH.SERVICE_NAME,
     });
   });
 
   // Endpoint principal exigido por el requerimiento: POST /process
-  router.post("/process", matrixController.handleProcess);
+  router.post(HTTP_CONSTANTS.ROUTES.PROCESS, matrixController.handleProcess);
 
   return router;
 }

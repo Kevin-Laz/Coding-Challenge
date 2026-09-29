@@ -45,27 +45,29 @@ export interface ProcessedMatrixResponse {
  * TypeScript desaparece en tiempo de ejecución (Transpiliación a JS).
  * Esta función garantiza la validez física del objeto en runtime lanzando excepciones de dominio explícitas.
  */
+import { DOMAIN_CONSTANTS } from "../../constants/domain.constants";
+
 export function assertValidMatrix(matrix: unknown): asserts matrix is Matrix2D {
   if (!Array.isArray(matrix) || matrix.length === 0) {
-    throw new Error("La matriz recibida debe ser un arreglo no vacío de arreglos numéricos.");
+    throw new Error(DOMAIN_CONSTANTS.ERRORS.EMPTY_MATRIX);
   }
 
   const rows = matrix.length;
   const cols = matrix[0]?.length;
 
   if (typeof cols !== "number" || cols === 0) {
-    throw new Error("La matriz no puede contener filas vacías.");
+    throw new Error(DOMAIN_CONSTANTS.ERRORS.EMPTY_ROW);
   }
 
   for (let i = 0; i < rows; i++) {
     const row = matrix[i];
     if (!Array.isArray(row)) {
-      throw new Error(`La fila en el índice ${i} no es un arreglo válido.`);
+      throw new Error(DOMAIN_CONSTANTS.ERRORS.INVALID_ROW(i));
     }
 
     if (row.length !== cols) {
       throw new Error(
-        `Asimetría dimensional detectada: La fila ${i} tiene ${row.length} columnas, se esperaban ${cols}.`
+        DOMAIN_CONSTANTS.ERRORS.DIMENSIONAL_ASYMMETRY(i, row.length, cols)
       );
     }
 
@@ -73,7 +75,7 @@ export function assertValidMatrix(matrix: unknown): asserts matrix is Matrix2D {
       const val = row[j];
       if (typeof val !== "number" || isNaN(val) || !isFinite(val)) {
         throw new Error(
-          `Valor numérico inválido en la posición [${i}][${j}]: los elementos deben ser números finitos float64.`
+          DOMAIN_CONSTANTS.ERRORS.INVALID_NUMERIC_VALUE(i, j)
         );
       }
     }
@@ -81,7 +83,7 @@ export function assertValidMatrix(matrix: unknown): asserts matrix is Matrix2D {
 
   if (rows < cols) {
     throw new Error(
-      `Restricción matemática QR: La matriz debe ser alta o cuadrada (filas m=${rows} >= columnas n=${cols}).`
+      DOMAIN_CONSTANTS.ERRORS.QR_RESTRICTION_TALL_OR_SQUARE(rows, cols)
     );
   }
 }
