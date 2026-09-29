@@ -3,6 +3,8 @@ package domain
 import (
 	"errors"
 	"fmt"
+
+	"qr-service-go/internal/constants"
 )
 
 /*
@@ -23,10 +25,10 @@ import (
 // Errores de dominio explícitos. Se usan tipos de error exportados para permitir
 // la inspección de errores mediante errors.Is en los adaptadores primarios (handlers HTTP).
 var (
-	ErrEmptyMatrix       = errors.New("la matriz no puede estar vacía ni contener filas vacías")
-	ErrInvalidDimensions = errors.New("la matriz debe tener dimensiones válidas")
-	ErrNonRectangular    = errors.New("todas las filas de la matriz deben poseer la misma cantidad de columnas")
-	ErrInsufficientRows  = errors.New("para la descomposición QR, el número de filas (m) debe ser mayor o igual al número de columnas (n)")
+	ErrEmptyMatrix       = errors.New(constants.ErrEmptyMatrixMsg)
+	ErrInvalidDimensions = errors.New(constants.ErrInvalidDimensionsMsg)
+	ErrNonRectangular    = errors.New(constants.ErrNonRectangularMsg)
+	ErrInsufficientRows  = errors.New(constants.ErrInsufficientRowsMsg)
 )
 
 // Matrix representa una estructura matricial bidimensional fuertemente tipada de números reales float64.

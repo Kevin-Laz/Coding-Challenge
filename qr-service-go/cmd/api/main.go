@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	adaptersHTTP "qr-service-go/internal/adapters/http"
+	"qr-service-go/internal/constants"
 	"qr-service-go/internal/core/services"
 )
 
@@ -33,7 +34,7 @@ import (
  */
 
 func main() {
-	log.Println("Inicializando Motor Concurrente de Descomposición QR (Go Fiber)...")
+	log.Println(constants.LogInitializingServer)
 
 	// 1. Instanciación del Core de Dominio
 	qrService := services.NewQRService()
@@ -43,7 +44,7 @@ func main() {
 
 	// 3. Creación de la app Fiber con configuraciones optimizadas
 	app := fiber.New(fiber.Config{
-		AppName:               "Go Fiber QR Engine",
+		AppName:               constants.AppName,
 		DisableStartupMessage: false,
 	})
 
@@ -53,17 +54,17 @@ func main() {
 	// 5. Lectura de puerto de entorno
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = constants.DefaultPort
 	}
 
 	// 6. Inicio asíncrono e implementación de Graceful Shutdown
 	go func() {
 		if err := app.Listen(":" + port); err != nil {
-			log.Printf("El servidor Fiber finalizó su ejecución: %v\n", err)
+			log.Printf(constants.LogServerStopped, err)
 		}
 	}()
 
-	log.Printf("Servidor Go Fiber escuchando en el puerto %s\n", port)
+	log.Printf(constants.LogServerListening, port)
 
 	// Canal para escuchar señales de apagado del SO
 	stopSig := make(chan os.Signal, 1)
@@ -72,10 +73,10 @@ func main() {
 	// Bloqueo hasta recibir la señal SIGINT / SIGTERM
 	<-stopSig
 
-	log.Println("Señal de apagado recibida. Ejecutando Graceful Shutdown...")
+	log.Println(constants.LogShutdownSignal)
 	if err := app.Shutdown(); err != nil {
-		log.Fatalf("Error durante el apagado del servidor Go: %v\n", err)
+		log.Fatalf(constants.LogShutdownError, err)
 	}
 
-	log.Println("Microservicio Go finalizado limpiamente.")
+	log.Println(constants.LogShutdownSuccess)
 }

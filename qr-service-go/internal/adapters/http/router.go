@@ -4,6 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+
+	"qr-service-go/internal/constants"
 )
 
 /*
@@ -26,14 +28,14 @@ func SetupRoutes(app *fiber.App, handler *QRHandler) {
 	app.Use(logger.New())
 
 	// Endpoint de comprobación de salud del contenedor/microservicio
-	app.Get("/health", func(c *fiber.Ctx) error {
+	app.Get(constants.RouteHealth, func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"status":  "healthy",
-			"service": "qr-service-go",
+			"status":  constants.HealthStatusHealthy,
+			"service": constants.HealthServiceName,
 		})
 	})
 
 	// Agrupamiento y definición de rutas del dominio QR
-	qrGroup := app.Group("/qr")
-	qrGroup.Post("/decompose", handler.HandleDecompose)
+	qrGroup := app.Group(constants.RouteGroupQR)
+	qrGroup.Post(constants.RouteQRDecompose, handler.HandleDecompose)
 }

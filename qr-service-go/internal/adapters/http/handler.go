@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
+	"qr-service-go/internal/constants"
 	"qr-service-go/internal/core/domain"
 	"qr-service-go/internal/core/ports"
 )
@@ -55,7 +56,7 @@ func (h *QRHandler) HandleDecompose(c *fiber.Ctx) error {
 	var req RequestDTO
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(ErrorDTO{
-			Error:   "JSON malformado o inválido",
+			Error:   constants.ErrMalformedJSONMsg,
 			Details: err.Error(),
 		})
 	}
@@ -71,12 +72,12 @@ func (h *QRHandler) HandleDecompose(c *fiber.Ctx) error {
 			errors.Is(err, domain.ErrNonRectangular),
 			errors.Is(err, domain.ErrInsufficientRows):
 			return c.Status(http.StatusBadRequest).JSON(ErrorDTO{
-				Error:   "Matriz con dimensiones o formato inválido",
+				Error:   constants.ErrInvalidMatrixMsg,
 				Details: err.Error(),
 			})
 		default:
 			return c.Status(http.StatusInternalServerError).JSON(ErrorDTO{
-				Error:   "Error interno durante el procesamiento de la matriz",
+				Error:   constants.ErrInternalProcessMsg,
 				Details: err.Error(),
 			})
 		}
