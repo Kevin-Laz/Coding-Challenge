@@ -15,7 +15,6 @@ import { CommonModule } from '@angular/common';
     >
       @if (errorMessage()) {
         <div class="status-content status-error">
-          <div class="status-indicator-dot error-dot" aria-hidden="true"></div>
           <div class="status-text-block">
             <span class="status-label">Validación / Error detectado</span>
             <p class="status-message">{{ errorMessage() }}</p>
@@ -23,7 +22,6 @@ import { CommonModule } from '@angular/common';
         </div>
       } @else {
         <div class="status-content status-info">
-          <div class="status-indicator-dot info-dot" aria-hidden="true"></div>
           <div class="status-text-block">
             <span class="status-label">Guía de navegación y uso</span>
             <p class="status-message">
@@ -57,24 +55,6 @@ import { CommonModule } from '@angular/common';
       align-items: flex-start;
       gap: 0.85rem;
       width: 100%;
-    }
-
-    .status-indicator-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      margin-top: 5px;
-      flex-shrink: 0;
-
-      &.info-dot {
-        background: var(--color-accent);
-        box-shadow: 0 0 6px var(--color-accent-dim);
-      }
-
-      &.error-dot {
-        background: var(--color-error);
-        box-shadow: 0 0 6px var(--color-error-dim);
-      }
     }
 
     .status-text-block {

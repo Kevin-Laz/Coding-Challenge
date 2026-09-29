@@ -12,70 +12,61 @@
     </div>
   }
 
-  <!-- Skeleton loader mientras calcula -->
+  <!-- Skeleton loader mientras calcula: replica estructura exacta de results-container -->
   @if (api.isProcessing()) {
-    <div class="skeleton-container" aria-busy="true" aria-label="Calculando descomposición QR">
-      <div class="skeleton-header">
-        <div class="skeleton-shimmer skeleton-title-bar"></div>
-        <div class="skeleton-shimmer skeleton-subtitle-bar"></div>
-      </div>
+    <div class="results-container skeleton-container" aria-busy="true" aria-label="Calculando descomposición QR">
 
-      <!-- Skeleton Métricas -->
+      <!-- Skeleton Métricas: 6 cards igual que el real -->
       <div class="metrics-grid">
         @for (i of [1,2,3,4,5,6]; track i) {
-          <div class="metric-card skeleton-card">
-            <div class="skeleton-shimmer skeleton-line-sm"></div>
-            <div class="skeleton-shimmer skeleton-line-lg"></div>
+          <div class="metric-card">
+            <div class="skeleton-shimmer sk-label"></div>
+            <div class="skeleton-shimmer sk-value"></div>
           </div>
         }
       </div>
 
       <!-- Skeleton Tabla -->
       <div class="section-block">
-        <div class="skeleton-shimmer skeleton-section-title"></div>
-        <div class="table-wrapper skeleton-table-box">
-          <div class="skeleton-shimmer skeleton-table-header"></div>
-          @for (row of [1,2,3,4,5]; track row) {
-            <div class="skeleton-shimmer skeleton-table-row"></div>
-          }
+        <div class="skeleton-shimmer sk-section-title"></div>
+        <div class="table-wrapper">
+          <div class="sk-table">
+            <div class="skeleton-shimmer sk-row sk-row-header"></div>
+            @for (row of [1,2,3,4,5]; track row) {
+              <div class="skeleton-shimmer sk-row"></div>
+            }
+          </div>
         </div>
       </div>
 
-      <!-- Skeleton Matrices -->
+      <!-- Skeleton Matrices: estructura idéntica a matrix-box real -->
       <div class="section-block">
-        <div class="skeleton-shimmer skeleton-section-title"></div>
+        <div class="skeleton-shimmer sk-section-title"></div>
         <div class="matrices-grid">
-          <div class="matrix-box skeleton-matrix-box">
-            <div class="skeleton-shimmer skeleton-box-head"></div>
-            <div class="skeleton-matrix-body">
-              @for (r of [1,2,3]; track r) {
-                <div class="skeleton-matrix-row">
-                  @for (c of [1,2,3]; track c) {
-                    <div class="skeleton-shimmer skeleton-cell"></div>
-                  }
-                </div>
-              }
+          @for (box of [1,2]; track box) {
+            <div class="matrix-box">
+              <div class="matrix-box-header">
+                <div class="skeleton-shimmer sk-box-title"></div>
+                <div class="skeleton-shimmer sk-box-hint"></div>
+              </div>
+              <div class="matrix-scroll">
+                @for (r of [1,2,3]; track r) {
+                  <div class="matrix-row">
+                    @for (c of [1,2,3]; track c) {
+                      <div class="skeleton-shimmer matrix-cell sk-cell"></div>
+                    }
+                  </div>
+                }
+              </div>
             </div>
-          </div>
-          <div class="matrix-box skeleton-matrix-box">
-            <div class="skeleton-shimmer skeleton-box-head"></div>
-            <div class="skeleton-matrix-body">
-              @for (r of [1,2,3]; track r) {
-                <div class="skeleton-matrix-row">
-                  @for (c of [1,2,3]; track c) {
-                    <div class="skeleton-shimmer skeleton-cell"></div>
-                  }
-                </div>
-              }
-            </div>
-          </div>
+          }
         </div>
       </div>
     </div>
   }
 
   <!-- Resultados -->
-  @if (api.result(); as result) {
+  @if (!api.isProcessing() && api.result(); as result) {
     <div class="results-container">
 
       <!-- Tarjetas de metricas -->
@@ -96,12 +87,12 @@
         </div>
 
         <div class="metric-card">
-          <span class="metric-label">Error de reconstruccion (||A-QR||)</span>
+          <span class="metric-label">Error de reconstruccion</span>
           <span class="metric-value accent">{{ result.qrResult.reconstructionErrorFrobenius.toExponential(4) }}</span>
         </div>
 
         <div class="metric-card">
-          <span class="metric-label">Numero de condicion est. (R max/min)</span>
+          <span class="metric-label">Numero de condicion est.</span>
           <span class="metric-value">{{ conditionNumber() }}</span>
         </div>
 

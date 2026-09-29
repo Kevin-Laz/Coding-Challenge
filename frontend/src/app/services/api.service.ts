@@ -129,6 +129,7 @@ export class ApiService {
 
   async processMatrix(matrix: Matrix2D): Promise<void> {
     this.isProcessing.set(true);
+    this.result.set(null);
     this.errorMessage.set(null);
 
     const currentToken = this.token();

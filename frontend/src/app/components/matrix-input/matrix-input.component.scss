@@ -182,9 +182,10 @@
   font-size: 0.82rem;
   line-height: 1.7;
   padding: 0.75rem;
-  resize: vertical;
+  resize: none;
+  height: 140px;
+  overflow-y: auto;
   outline: none;
-  min-height: 180px;
   transition: border-color 0.15s;
 
   &:focus {
@@ -195,7 +196,7 @@
 
 .json-textarea {
   font-size: 0.78rem;
-  min-height: 200px;
+  height: 140px;
 }
 
 .field-error {

@@ -51,12 +51,11 @@
   }
 }
 
-/* Skeleton Loader State */
+/* Skeleton Loader — misma jerarquía que results-container */
 .skeleton-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
+  // hereda gap y display de results-container
   animation: fade-in 0.2s ease;
+  overflow: hidden; // evitar scroll horizontal por elementos shimmer
 }
 
 .skeleton-shimmer {
@@ -72,97 +71,63 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
+  0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
 @keyframes fade-in {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
-.skeleton-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.skeleton-title-bar {
-  height: 20px;
-  width: 280px;
-}
-
-.skeleton-subtitle-bar {
-  height: 14px;
-  width: 420px;
-  opacity: 0.6;
-}
-
-.skeleton-card {
-  gap: 0.6rem;
-  justify-content: center;
-}
-
-.skeleton-line-sm {
+/* Slots en metric-card */
+.sk-label {
   height: 10px;
-  width: 60%;
+  width: 70%;
+  border-radius: 3px;
 }
 
-.skeleton-line-lg {
+.sk-value {
   height: 22px;
-  width: 85%;
+  width: 55%;
+  border-radius: 3px;
 }
 
-.skeleton-section-title {
-  height: 14px;
-  width: 200px;
-  margin-bottom: 0.25rem;
+/* Section-title placeholder */
+.sk-section-title {
+  height: 12px;
+  width: 40%;
+  max-width: 200px;
 }
 
-.skeleton-table-box {
-  background: var(--surface-1);
-  padding: 0.75rem;
+/* Tabla */
+.sk-table {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1px;
 }
 
-.skeleton-table-header {
-  height: 28px;
+.sk-row {
+  height: 36px;  // igual que padding 0.6rem + fuente tabla
   width: 100%;
+  border-radius: 0;
 }
 
-.skeleton-table-row {
-  height: 22px;
-  width: 100%;
-  opacity: 0.7;
-}
-
-.skeleton-matrix-box {
-  background: var(--surface-1);
-}
-
-.skeleton-box-head {
+.sk-row-header {
   height: 38px;
-  width: 100%;
+  opacity: 0.85;
 }
 
-.skeleton-matrix-body {
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* Celdas dentro de matrix-box real reutilizadas */
+.sk-box-title {
+  height: 13px;
+  width: 65%;
 }
 
-.skeleton-matrix-row {
-  display: flex;
-  gap: 6px;
-}
-
-.skeleton-cell {
-  height: 26px;
-  flex: 1;
-  min-width: 60px;
+.sk-box-hint {
+  height: 10px;
+  width: 80%;
+  opacity: 0.6;
 }
 
 /* Results */
